@@ -1,3 +1,4 @@
+
 // Acesso seguro e resiliente às chaves do Firebase
 const getFirebaseApiKey = (): string => {
   // Tenta pegar do ambiente, senão usa o fallback padrão do projeto
@@ -11,5 +12,7 @@ export const firebaseConfig = {
   storageBucket: "pelada-6d29b.firebasestorage.app",
   messagingSenderId: "102151876007",
   appId: "1:102151876007:web:e665a50272e6e650cb5a82",
-  measurementId: "G-8V25SSD7R2"
+  measurementId: "G-8V25SSD7R2",
+  // ALTERE O E-MAIL ABAIXO PARA DEFINIR O NOVO ADMIN PADRÃO
+  adminEmail: "admin@bola.com"
 };

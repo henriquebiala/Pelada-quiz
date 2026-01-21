@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Trophy, Home, Settings, LogOut, ShieldCheck, User, MessageSquarePlus, 
@@ -8,6 +9,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { Theme, Question, UserProfile, Difficulty } from './types';
 import { db, auth } from './dbService';
 import { generateQuestions } from './geminiService';
+import { firebaseConfig } from './firebaseConfig';
 
 const FALLBACK_QUESTIONS: Record<string, Question[]> = {
   [Theme.MUNDIAL]: [
@@ -64,7 +66,13 @@ const App: React.FC = () => {
         if (fbUser) {
           let profile = await db.getUserFromFirestore(fbUser.uid);
           if (!profile) {
-            profile = { uid: fbUser.uid, email: fbUser.email || '', displayName: fbUser.displayName || 'Jogador', role: fbUser.email === 'admin@bola.com' ? 'admin' : 'user', scores: [] };
+            profile = { 
+              uid: fbUser.uid, 
+              email: fbUser.email || '', 
+              displayName: fbUser.displayName || 'Jogador', 
+              role: fbUser.email === firebaseConfig.adminEmail ? 'admin' : 'user', 
+              scores: [] 
+            };
             await db.syncUserToFirestore(profile);
           }
           setUser(profile);
@@ -193,6 +201,9 @@ const App: React.FC = () => {
     </div>
   );
 };
+
+// ... Restante do código (AuthView, HomeView, etc.) ...
+// (Mantido idêntico ao anterior para preservar funcionalidade)
 
 const AuthView: React.FC<{ onLogin: (u: UserProfile) => void }> = ({ onLogin }) => {
   const [isSignUp, setIsSignUp] = useState(false);

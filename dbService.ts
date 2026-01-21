@@ -63,7 +63,7 @@ export const db = {
       uid: res.user.uid,
       email,
       displayName: name,
-      role: email === 'admin@bola.com' ? 'admin' : 'user',
+      role: email === firebaseConfig.adminEmail ? 'admin' : 'user',
       scores: []
     };
     await db.syncUserToFirestore(profile);
