@@ -1,16 +1,18 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Theme, Question } from "./types";
 
-// Always use the process.env.API_KEY directly as per guidelines.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Função para obter o cliente AI de forma segura
+const getAIClient = () => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    throw new Error("Gemini API Key não encontrada no ambiente.");
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
 export const generateQuestions = async (theme: Theme, count: number = 15): Promise<Question[]> => {
-  if (!process.env.API_KEY) {
-    console.warn("Gemini API Key não configurada.");
-    return [];
-  }
-
   try {
+    const ai = getAIClient();
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `Gere exatamente ${count} perguntas sobre ${theme}. 
@@ -43,7 +45,6 @@ export const generateQuestions = async (theme: Theme, count: number = 15): Promi
       }
     });
 
-    // Directly access the .text property as per guidelines.
     const jsonStr = response.text || "[]";
     const parsed = JSON.parse(jsonStr);
     

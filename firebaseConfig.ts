@@ -1,10 +1,11 @@
-// Acesso direto e seguro às variáveis de ambiente injetadas
-const getApiKey = (): string => {
-  return (window as any).process?.env?.FIREBASE_API_KEY || "AIzaSyDlo0VEa5CHZqS-iSM5G005BuUpE8X3GG4";
+// Acesso seguro e resiliente às chaves do Firebase
+const getFirebaseApiKey = (): string => {
+  // Tenta pegar do ambiente, senão usa o fallback padrão do projeto
+  return (process.env as any).FIREBASE_API_KEY || "AIzaSyDlo0VEa5CHZqS-iSM5G005BuUpE8X3GG4";
 };
 
 export const firebaseConfig = {
-  apiKey: getApiKey(),
+  apiKey: getFirebaseApiKey(),
   authDomain: "pelada-6d29b.firebaseapp.com",
   projectId: "pelada-6d29b",
   storageBucket: "pelada-6d29b.firebasestorage.app",
