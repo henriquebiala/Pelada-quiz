@@ -3,7 +3,7 @@ import {
   Trophy, Home, Settings, LogOut, ShieldCheck, User, MessageSquarePlus, 
   Play, CheckCircle, XCircle, Star, Target, Volume2, VolumeX, 
   Globe, LayoutGrid, ChevronRight, Zap, Award, Code, Microscope,
-  AlertTriangle
+  AlertTriangle, ChevronLeft
 } from 'lucide-react';
 import { onAuthStateChanged } from "firebase/auth";
 import { Theme, Question, UserProfile, Difficulty } from './types';
@@ -30,25 +30,30 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-      if (fbUser) {
-        let profile = await db.getUserFromFirestore(fbUser.uid);
-        if (!profile) {
-          profile = {
-            uid: fbUser.uid,
-            email: fbUser.email || '',
-            displayName: fbUser.displayName || fbUser.email?.split('@')[0] || 'Craque',
-            role: fbUser.email === 'admin@bola.com' ? 'admin' : 'user',
-            scores: []
-          };
-          await db.syncUserToFirestore(profile);
+      try {
+        if (fbUser) {
+          let profile = await db.getUserFromFirestore(fbUser.uid);
+          if (!profile) {
+            profile = {
+              uid: fbUser.uid,
+              email: fbUser.email || '',
+              displayName: fbUser.displayName || fbUser.email?.split('@')[0] || 'Craque',
+              role: fbUser.email === 'admin@bola.com' ? 'admin' : 'user',
+              scores: []
+            };
+            await db.syncUserToFirestore(profile);
+          }
+          setUser(profile);
+          db.setCurrentUser(profile);
+        } else {
+          setUser(null);
+          db.setCurrentUser(null);
         }
-        setUser(profile);
-        db.setCurrentUser(profile);
-      } else {
-        setUser(null);
-        db.setCurrentUser(null);
+      } catch (e) {
+        console.error("Auth sync error:", e);
+      } finally {
+        setIsInitializing(false);
       }
-      setIsInitializing(false);
     });
 
     audioCorrect.current = new Audio(SOUND_URLS.correct);
@@ -87,7 +92,7 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#f8fafc] text-slate-900">
+    <div className="flex-1 flex flex-col h-full bg-[#f8fafc] text-slate-900 overflow-hidden">
       {!user ? (
         <AuthView onLogin={(u) => { setUser(u); setView('home'); }} />
       ) : (
@@ -246,30 +251,28 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
     const loadQs = async () => {
       setLoad(true);
       try {
-        // Garantindo 15 questões (5 fáceis, 5 médias, 5 difíceis) via IA
         const aiItems = await generateQuestions(theme, 15);
-        if (aiItems.length > 0) {
-          // Ordenar por dificuldade para criar uma curva de desafio (Fácil -> Médio -> Difícil)
+        if (aiItems && aiItems.length > 0) {
           const sorted = [...aiItems].sort((a, b) => {
             const order: Record<string, number> = { 'fácil': 1, 'médio': 2, 'difícil': 3 };
             return (order[a.difficulty] || 0) - (order[b.difficulty] || 0);
           });
           setQs(sorted);
         } else {
-           // Fallback se a IA falhar (puxa do banco se houver)
            const fallback = await db.getQuestions(theme);
            setQs(fallback);
         }
       } catch(e) { 
-        console.error("Erro ao carregar questões:", e);
+        console.error("Error loading questions:", e);
+      } finally {
+        setLoad(false);
       }
-      setLoad(false);
     };
     loadQs();
   }, [theme]);
 
   const handle = (opt: string) => {
-    if (feedback) return;
+    if (feedback || !qs[idx]) return;
     setSelected(opt);
     const isCorrect = opt === qs[idx].correctAnswer;
     if (isCorrect) {
@@ -287,14 +290,14 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
   if (load) return (
     <div className="h-[60vh] flex flex-col items-center justify-center p-6 text-center">
       <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Escalando as 15 perguntas de elite...</p>
+      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Preparando as 15 perguntas de elite...</p>
     </div>
   );
 
   if (qs.length === 0) return (
     <div className="h-[60vh] flex flex-col items-center justify-center p-8 text-center">
       <AlertTriangle className="text-amber-500 mb-4" size={48} />
-      <p className="text-slate-600 font-bold mb-6">Não conseguimos carregar as perguntas para este estádio.</p>
+      <p className="text-slate-600 font-bold mb-6">Não conseguimos carregar as perguntas.</p>
       <button onClick={() => window.location.reload()} className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold uppercase text-xs">Recarregar</button>
     </div>
   );
@@ -309,7 +312,7 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
            <div className={`w-2 h-2 rounded-full animate-pulse ${q.difficulty === 'fácil' ? 'bg-emerald-400' : q.difficulty === 'médio' ? 'bg-amber-400' : 'bg-red-400'}`}></div>
            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{theme} • {q.difficulty}</span>
         </div>
-        <span className="text-xs font-black text-slate-900">QUESTÃO {idx + 1}/{qs.length}</span>
+        <span className="text-xs font-black text-slate-900 uppercase">Questão {idx + 1}/{qs.length}</span>
       </div>
 
       <div className="w-full h-2 bg-slate-100 rounded-full mb-8 overflow-hidden">
@@ -392,12 +395,12 @@ const SettingsView: React.FC<{ user: UserProfile, onToggleMute: any, isMuted: bo
       </button>
       <button onClick={() => setView('suggest')} className="w-full p-5 bg-white rounded-3xl flex items-center gap-4 border border-slate-100 shadow-sm active:bg-slate-50">
         <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-emerald-600"><MessageSquarePlus size={20} /></div>
-        <span className="font-bold uppercase text-[11px] tracking-widest">Contribuir com Questões</span>
+        <span className="font-bold uppercase text-[11px] tracking-widest">Contribuir</span>
       </button>
       {user.role === 'admin' && (
         <button onClick={() => setView('admin')} className="w-full p-5 bg-emerald-50 rounded-3xl flex items-center gap-4 border border-emerald-100 shadow-sm active:bg-emerald-100">
           <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-600"><ShieldCheck size={20} /></div>
-          <span className="font-bold uppercase text-[11px] tracking-widest text-emerald-700">Painel do VAR (Admin)</span>
+          <span className="font-bold uppercase text-[11px] tracking-widest text-emerald-700">Painel do VAR</span>
         </button>
       )}
       <button onClick={onLogout} className="w-full p-5 bg-red-50 text-red-600 rounded-3xl flex items-center gap-4 border border-red-100 mt-10 active:bg-red-100">
@@ -530,7 +533,7 @@ const SuggestView: React.FC<{ user: UserProfile, onBack: any }> = ({ user, onBac
     <div className="px-8 py-20 text-center animate-app-in">
       <div className="text-6xl mb-6">✅</div>
       <h2 className="text-2xl font-black italic uppercase mb-2">Sugestão Enviada!</h2>
-      <p className="text-slate-400 text-sm mb-10">Obrigado! Sua pergunta será analisada pelo VAR em breve.</p>
+      <p className="text-slate-400 text-sm mb-10">Sua pergunta será analisada pelo VAR em breve.</p>
       <button onClick={onBack} className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest italic shadow-xl active:scale-95 transition-all">Continuar</button>
     </div>
   );
