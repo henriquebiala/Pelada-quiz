@@ -2,9 +2,16 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Theme, Question } from "./types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Acesso seguro para evitar erros em tempo de execução
+const apiKey = (typeof process !== 'undefined' && process.env?.API_KEY) ? process.env.API_KEY : '';
+const ai = new GoogleGenAI({ apiKey });
 
 export const generateQuestions = async (theme: Theme, count: number = 8): Promise<Question[]> => {
+  if (!apiKey) {
+    console.warn("Gemini API Key não configurada. Usando perguntas locais.");
+    return [];
+  }
+
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
