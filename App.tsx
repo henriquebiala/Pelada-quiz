@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Trophy, Home, Settings, LogOut, ShieldCheck, User, MessageSquarePlus, 
-  Play, Target, Volume2, VolumeX, Globe, ChevronRight, Zap, Award, AlertTriangle
+  Target, Volume2, VolumeX, Globe, ChevronRight, Zap, Award, AlertTriangle
 } from 'lucide-react';
 import { onAuthStateChanged } from "firebase/auth";
 import { Theme, Question, UserProfile, Difficulty } from './types';
@@ -27,6 +27,7 @@ const App: React.FC = () => {
   const audioNext = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
+    console.log("App: Iniciando sincronização Auth...");
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       try {
         if (fbUser) {
@@ -85,7 +86,7 @@ const App: React.FC = () => {
     <div className="flex flex-col items-center justify-center h-screen bg-slate-900 text-white p-6 text-center">
       <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-6"></div>
       <h1 className="text-2xl font-black uppercase italic tracking-tighter">Bom de Bola</h1>
-      <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest mt-2 animate-pulse">Aquecendo para o jogo...</p>
+      <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest mt-2 animate-pulse">Entrando em campo...</p>
     </div>
   );
 
@@ -251,7 +252,6 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
       try {
         const aiItems = await generateQuestions(theme, 15);
         if (aiItems && aiItems.length > 0) {
-          // Ordenar: 5 fáceis -> 5 médias -> 5 difíceis
           const sorted = [...aiItems].sort((a, b) => {
             const order: Record<string, number> = { 'fácil': 1, 'médio': 2, 'difícil': 3 };
             return (order[a.difficulty] || 0) - (order[b.difficulty] || 0);
@@ -289,7 +289,7 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
   if (load) return (
     <div className="h-[60vh] flex flex-col items-center justify-center p-6 text-center">
       <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Escalando as 15 perguntas de elite...</p>
+      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Preparando as 15 perguntas de elite...</p>
     </div>
   );
 
@@ -315,7 +315,7 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
       </div>
 
       <div className="w-full h-2 bg-slate-100 rounded-full mb-8 overflow-hidden">
-        <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${progress}%` }}></div>
+        <div className="h-full bg-emerald-500 transition-all duration-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]" style={{ width: `${progress}%` }}></div>
       </div>
 
       <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-50 flex flex-col items-center mb-6 min-h-[300px] justify-center">
@@ -351,7 +351,7 @@ const ResultsView: React.FC<{ score: number, onRestart: () => void }> = ({ score
   <div className="px-8 py-12 flex-1 flex flex-col justify-center items-center text-center animate-app-in">
     <div className="text-8xl mb-6">🏆</div>
     <h2 className="text-4xl font-black italic uppercase tracking-tighter mb-2">CAMPEÃO!</h2>
-    <p className="text-slate-400 font-bold text-sm mb-10">Você completou as 15 perguntas de elite!</p>
+    <p className="text-slate-400 font-bold text-sm mb-10">Você completou o desafio das 15 perguntas!</p>
     <div className="bg-emerald-600 w-full p-8 rounded-[3rem] text-white shadow-2xl shadow-emerald-600/30 mb-10">
       <p className="text-6xl font-black">{score}</p>
       <p className="text-[10px] font-bold uppercase tracking-widest mt-2 opacity-70">Placar Final</p>
@@ -392,6 +392,12 @@ const SettingsView: React.FC<{ user: UserProfile, onToggleMute: any, isMuted: bo
         <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-emerald-600"><MessageSquarePlus size={20} /></div>
         <span className="font-bold uppercase text-[11px] tracking-widest">Sugerir Pergunta</span>
       </button>
+      {user.role === 'admin' && (
+        <button onClick={() => setView('admin')} className="w-full p-5 bg-emerald-50 rounded-3xl flex items-center gap-4 border border-emerald-100 shadow-sm">
+          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-600"><ShieldCheck size={20} /></div>
+          <span className="font-bold uppercase text-[11px] tracking-widest text-emerald-700">Painel do VAR</span>
+        </button>
+      )}
       <button onClick={onLogout} className="w-full p-5 bg-red-50 text-red-600 rounded-3xl flex items-center gap-4 border border-red-100 mt-10">
         <LogOut size={20} />
         <span className="font-bold uppercase text-[11px] tracking-widest">Sair da Conta</span>
@@ -469,7 +475,7 @@ const AdminView: React.FC<{ onBack: any }> = ({ onBack }) => {
   useEffect(() => { db.getPendingQuestions().then(setPend); }, []);
   return (
     <div className="px-6 py-6 animate-app-in">
-      <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8">VAR</h2>
+      <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8">Central do VAR</h2>
       <div className="space-y-4">
         {pend.length === 0 ? (
           <p className="text-center py-20 text-slate-300 font-bold uppercase text-[10px]">Tudo limpo no VAR</p>

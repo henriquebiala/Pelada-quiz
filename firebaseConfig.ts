@@ -1,15 +1,10 @@
-
-// Acesso seguro às variáveis de ambiente para evitar ReferenceError no navegador
-const getEnv = (key: string): string | undefined => {
-  try {
-    return (window as any).process?.env?.[key] || (process as any)?.env?.[key];
-  } catch {
-    return undefined;
-  }
+// Acesso direto e seguro às variáveis de ambiente injetadas
+const getApiKey = (): string => {
+  return (window as any).process?.env?.FIREBASE_API_KEY || "AIzaSyDlo0VEa5CHZqS-iSM5G005BuUpE8X3GG4";
 };
 
 export const firebaseConfig = {
-  apiKey: getEnv('FIREBASE_API_KEY') || "AIzaSyDlo0VEa5CHZqS-iSM5G005BuUpE8X3GG4",
+  apiKey: getApiKey(),
   authDomain: "pelada-6d29b.firebaseapp.com",
   projectId: "pelada-6d29b",
   storageBucket: "pelada-6d29b.firebasestorage.app",
