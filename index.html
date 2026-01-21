@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Bom de Bola - App de Quiz</title>
+    <title>Bom de Bola - Quiz de Elite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      // Garante que o objeto process existe antes de qualquer módulo carregar
+      window.process = window.process || { env: {} };
+    </script>
     <style>
         :root {
             --app-max-width: 480px;
@@ -31,17 +35,8 @@
           flex-direction: column;
           position: relative;
         }
-        button:active {
-          transform: scale(0.96);
-        }
-        @media (max-width: 480px) {
-          #root {
-            box-shadow: none;
-          }
-        }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        button:active { transform: scale(0.96); }
+        @media (max-width: 480px) { #root { box-shadow: none; } }
         
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(10px); }
@@ -49,7 +44,7 @@
         }
         .animate-app-in { animation: fadeIn 0.4s ease-out forwards; }
     </style>
-<script type="importmap">
+    <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@19.0.0",
@@ -60,8 +55,8 @@
     "firebase/auth": "https://esm.sh/firebase@10.8.0/auth",
     "firebase/firestore": "https://esm.sh/firebase@10.8.0/firestore",
     "@google/genai": "https://esm.sh/@google/genai@1.3.0",
-    "react/": "https://esm.sh/react@^19.2.3/",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
     "firebase/": "https://esm.sh/firebase@^12.8.0/"
   }
 }

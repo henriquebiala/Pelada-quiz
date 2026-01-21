@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Trophy, Home, Settings, LogOut, ShieldCheck, User, MessageSquarePlus, 
-  Play, CheckCircle, XCircle, Star, Target, Volume2, VolumeX, 
-  Globe, LayoutGrid, ChevronRight, Zap, Award, Code, Microscope,
-  AlertTriangle, ChevronLeft
+  Play, Target, Volume2, VolumeX, Globe, ChevronRight, Zap, Award, AlertTriangle
 } from 'lucide-react';
 import { onAuthStateChanged } from "firebase/auth";
 import { Theme, Question, UserProfile, Difficulty } from './types';
@@ -50,7 +48,7 @@ const App: React.FC = () => {
           db.setCurrentUser(null);
         }
       } catch (e) {
-        console.error("Auth sync error:", e);
+        console.error("Erro na sincronização de perfil:", e);
       } finally {
         setIsInitializing(false);
       }
@@ -71,7 +69,7 @@ const App: React.FC = () => {
 
   const Credits = () => (
     <div className="mt-auto py-8 px-6 text-center border-t border-slate-100 bg-slate-50/50">
-      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3">Créditos</p>
+      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3">Créditos de Produção</p>
       <div className="flex flex-col gap-1.5">
         <p className="text-[11px] font-bold text-slate-600">
           <span className="text-emerald-600">Desenvolvido por</span> Henrique Biala
@@ -87,7 +85,7 @@ const App: React.FC = () => {
     <div className="flex flex-col items-center justify-center h-screen bg-slate-900 text-white p-6 text-center">
       <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-6"></div>
       <h1 className="text-2xl font-black uppercase italic tracking-tighter">Bom de Bola</h1>
-      <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest mt-2 animate-pulse">Entrando em campo...</p>
+      <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest mt-2 animate-pulse">Aquecendo para o jogo...</p>
     </div>
   );
 
@@ -190,15 +188,15 @@ const AuthView: React.FC<{ onLogin: (u: UserProfile) => void }> = ({ onLogin }) 
       <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.3em] text-center mb-10">O quiz oficial da resenha</p>
       
       <form onSubmit={handle} className="space-y-3">
-        {isSignUp && <input required className="w-full p-4 bg-slate-100 rounded-2xl outline-none border-2 border-transparent focus:border-emerald-500 font-bold transition-all" placeholder="Seu Nome de Craque" value={name} onChange={e => setName(e.target.value)} />}
-        <input required className="w-full p-4 bg-slate-100 rounded-2xl outline-none border-2 border-transparent focus:border-emerald-500 font-bold transition-all" placeholder="E-mail" type="email" value={email} onChange={e => setEmail(e.target.value)} />
-        <input required className="w-full p-4 bg-slate-100 rounded-2xl outline-none border-2 border-transparent focus:border-emerald-500 font-bold transition-all" placeholder="Sua Senha" type="password" value={pass} onChange={e => setPass(e.target.value)} />
+        {isSignUp && <input required className="w-full p-4 bg-slate-100 rounded-2xl outline-none border-2 border-transparent focus:border-emerald-500 font-bold" placeholder="Nome" value={name} onChange={e => setName(e.target.value)} />}
+        <input required className="w-full p-4 bg-slate-100 rounded-2xl outline-none border-2 border-transparent focus:border-emerald-500 font-bold" placeholder="E-mail" type="email" value={email} onChange={e => setEmail(e.target.value)} />
+        <input required className="w-full p-4 bg-slate-100 rounded-2xl outline-none border-2 border-transparent focus:border-emerald-500 font-bold" placeholder="Senha" type="password" value={pass} onChange={e => setPass(e.target.value)} />
         <button disabled={load} className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest italic shadow-xl shadow-emerald-600/20 active:scale-95 transition-all">
-          {load ? 'Entrando...' : isSignUp ? 'Criar Perfil' : 'Entrar em Campo'}
+          {load ? 'Aguarde...' : isSignUp ? 'Criar Conta' : 'Entrar em Campo'}
         </button>
       </form>
       
-      <button onClick={() => setIsSignUp(!isSignUp)} className="mt-8 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">
+      <button onClick={() => setIsSignUp(!isSignUp)} className="mt-8 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center w-full">
         {isSignUp ? 'Já tem conta? Fazer Login' : 'Novo por aqui? Criar Conta'}
       </button>
     </div>
@@ -253,6 +251,7 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
       try {
         const aiItems = await generateQuestions(theme, 15);
         if (aiItems && aiItems.length > 0) {
+          // Ordenar: 5 fáceis -> 5 médias -> 5 difíceis
           const sorted = [...aiItems].sort((a, b) => {
             const order: Record<string, number> = { 'fácil': 1, 'médio': 2, 'difícil': 3 };
             return (order[a.difficulty] || 0) - (order[b.difficulty] || 0);
@@ -263,7 +262,7 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
            setQs(fallback);
         }
       } catch(e) { 
-        console.error("Error loading questions:", e);
+        console.error("Erro ao carregar questões:", e);
       } finally {
         setLoad(false);
       }
@@ -290,15 +289,15 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
   if (load) return (
     <div className="h-[60vh] flex flex-col items-center justify-center p-6 text-center">
       <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Preparando as 15 perguntas de elite...</p>
+      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Escalando as 15 perguntas de elite...</p>
     </div>
   );
 
   if (qs.length === 0) return (
     <div className="h-[60vh] flex flex-col items-center justify-center p-8 text-center">
       <AlertTriangle className="text-amber-500 mb-4" size={48} />
-      <p className="text-slate-600 font-bold mb-6">Não conseguimos carregar as perguntas.</p>
-      <button onClick={() => window.location.reload()} className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold uppercase text-xs">Recarregar</button>
+      <p className="text-slate-600 font-bold mb-6">Erro ao carregar as perguntas.</p>
+      <button onClick={() => window.location.reload()} className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold uppercase text-xs">Tentar Novamente</button>
     </div>
   );
 
@@ -312,18 +311,15 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
            <div className={`w-2 h-2 rounded-full animate-pulse ${q.difficulty === 'fácil' ? 'bg-emerald-400' : q.difficulty === 'médio' ? 'bg-amber-400' : 'bg-red-400'}`}></div>
            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{theme} • {q.difficulty}</span>
         </div>
-        <span className="text-xs font-black text-slate-900 uppercase">Questão {idx + 1}/{qs.length}</span>
+        <span className="text-xs font-black text-slate-900 uppercase">RODADA {idx + 1}/{qs.length}</span>
       </div>
 
       <div className="w-full h-2 bg-slate-100 rounded-full mb-8 overflow-hidden">
-        <div className="h-full bg-emerald-500 transition-all duration-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]" style={{ width: `${progress}%` }}></div>
+        <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${progress}%` }}></div>
       </div>
 
       <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-50 flex flex-col items-center mb-6 min-h-[300px] justify-center">
-        <h3 className="text-xl font-black text-slate-800 text-center leading-tight mb-8">
-          {q.text}
-        </h3>
-        
+        <h3 className="text-xl font-black text-slate-800 text-center leading-tight mb-8">{q.text}</h3>
         <div className="w-full space-y-3">
           {q.options.map(o => (
             <button 
@@ -333,9 +329,8 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
               className={`
                 w-full p-5 rounded-2xl text-left font-bold transition-all border-2 text-sm
                 ${selected === o ? 'border-emerald-500 scale-[0.98]' : 'border-slate-50 bg-slate-50'}
-                ${feedback === 'correct' && o === q.correctAnswer ? '!bg-emerald-600 !text-white !border-emerald-600 shadow-lg shadow-emerald-600/20' : ''}
-                ${feedback === 'incorrect' && selected === o ? '!bg-red-500 !text-white !border-red-500 shadow-lg shadow-red-500/20' : ''}
-                active:scale-[0.97]
+                ${feedback === 'correct' && o === q.correctAnswer ? '!bg-emerald-600 !text-white !border-emerald-600' : ''}
+                ${feedback === 'incorrect' && selected === o ? '!bg-red-500 !text-white !border-red-500' : ''}
               `}
             >
               {o}
@@ -346,7 +341,7 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
 
       <div className="text-center mt-auto pb-4">
         <p className="text-3xl font-black text-emerald-600 leading-none">{idx * 10}</p>
-        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">PONTOS NA PARTIDA</p>
+        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">PONTOS ACUMULADOS</p>
       </div>
     </div>
   );
@@ -355,11 +350,11 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
 const ResultsView: React.FC<{ score: number, onRestart: () => void }> = ({ score, onRestart }) => (
   <div className="px-8 py-12 flex-1 flex flex-col justify-center items-center text-center animate-app-in">
     <div className="text-8xl mb-6">🏆</div>
-    <h2 className="text-4xl font-black italic uppercase tracking-tighter mb-2 text-slate-900">CAMPEÃO!</h2>
-    <p className="text-slate-400 font-bold text-sm mb-10">Você completou o desafio das 15 perguntas!</p>
+    <h2 className="text-4xl font-black italic uppercase tracking-tighter mb-2">CAMPEÃO!</h2>
+    <p className="text-slate-400 font-bold text-sm mb-10">Você completou as 15 perguntas de elite!</p>
     <div className="bg-emerald-600 w-full p-8 rounded-[3rem] text-white shadow-2xl shadow-emerald-600/30 mb-10">
       <p className="text-6xl font-black">{score}</p>
-      <p className="text-[10px] font-bold uppercase tracking-widest mt-2 opacity-70">Sua Pontuação Final</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest mt-2 opacity-70">Placar Final</p>
     </div>
     <button onClick={onRestart} className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest italic shadow-xl active:scale-95 transition-all">Jogar de Novo</button>
   </div>
@@ -369,12 +364,12 @@ const GameOverView: React.FC<{ score: number, onRestart: () => void }> = ({ scor
   <div className="px-8 py-12 flex-1 flex flex-col justify-center items-center text-center animate-app-in">
     <div className="text-8xl mb-6">🟥</div>
     <h2 className="text-4xl font-black italic uppercase tracking-tighter mb-2 text-red-600">EXPULSO!</h2>
-    <p className="text-slate-400 font-bold text-sm mb-10">Errou uma questão crucial. O juiz apitou!</p>
+    <p className="text-slate-400 font-bold text-sm mb-10">O juiz apitou o fim prematuro.</p>
     <div className="bg-red-50 w-full p-8 rounded-[3rem] border-2 border-red-100 mb-10">
       <p className="text-6xl font-black text-red-600">{score}</p>
-      <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-red-400">Pontos Até Agora</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-red-400">Pontuação</p>
     </div>
-    <button onClick={onRestart} className="w-full py-5 bg-red-600 text-white rounded-2xl font-black uppercase tracking-widest italic shadow-xl active:scale-95 transition-all">Pedir Revanche</button>
+    <button onClick={onRestart} className="w-full py-5 bg-red-600 text-white rounded-2xl font-black uppercase tracking-widest italic shadow-xl active:scale-95 transition-all">Tentar Revanche</button>
   </div>
 );
 
@@ -382,28 +377,22 @@ const SettingsView: React.FC<{ user: UserProfile, onToggleMute: any, isMuted: bo
   <div className="px-6 py-8 flex-1 flex flex-col animate-app-in">
     <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8 px-2">Opções</h2>
     <div className="space-y-3">
-      <button onClick={onToggleMute} className="w-full p-5 bg-white rounded-3xl flex items-center justify-between border border-slate-100 shadow-sm active:bg-slate-50">
+      <button onClick={onToggleMute} className="w-full p-5 bg-white rounded-3xl flex items-center justify-between border border-slate-100 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-emerald-600">
             {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
           </div>
-          <span className="font-bold uppercase text-[11px] tracking-widest">{isMuted ? 'Áudio: Mudo' : 'Áudio: Ligado'}</span>
+          <span className="font-bold uppercase text-[11px] tracking-widest">{isMuted ? 'Som: Mudo' : 'Som: Ligado'}</span>
         </div>
         <div className={`w-12 h-6 rounded-full relative transition-all ${isMuted ? 'bg-slate-200' : 'bg-emerald-500'}`}>
           <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isMuted ? 'left-1' : 'left-7'}`}></div>
         </div>
       </button>
-      <button onClick={() => setView('suggest')} className="w-full p-5 bg-white rounded-3xl flex items-center gap-4 border border-slate-100 shadow-sm active:bg-slate-50">
+      <button onClick={() => setView('suggest')} className="w-full p-5 bg-white rounded-3xl flex items-center gap-4 border border-slate-100 shadow-sm">
         <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-emerald-600"><MessageSquarePlus size={20} /></div>
-        <span className="font-bold uppercase text-[11px] tracking-widest">Contribuir</span>
+        <span className="font-bold uppercase text-[11px] tracking-widest">Sugerir Pergunta</span>
       </button>
-      {user.role === 'admin' && (
-        <button onClick={() => setView('admin')} className="w-full p-5 bg-emerald-50 rounded-3xl flex items-center gap-4 border border-emerald-100 shadow-sm active:bg-emerald-100">
-          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-600"><ShieldCheck size={20} /></div>
-          <span className="font-bold uppercase text-[11px] tracking-widest text-emerald-700">Painel do VAR</span>
-        </button>
-      )}
-      <button onClick={onLogout} className="w-full p-5 bg-red-50 text-red-600 rounded-3xl flex items-center gap-4 border border-red-100 mt-10 active:bg-red-100">
+      <button onClick={onLogout} className="w-full p-5 bg-red-50 text-red-600 rounded-3xl flex items-center gap-4 border border-red-100 mt-10">
         <LogOut size={20} />
         <span className="font-bold uppercase text-[11px] tracking-widest">Sair da Conta</span>
       </button>
@@ -424,17 +413,14 @@ const RankingView: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8 px-2">Top 10 Global</h2>
       <div className="space-y-2">
         {load ? (
-          <div className="p-10 text-center text-slate-300 font-bold uppercase text-[10px]">Escalando o placar...</div>
+          <div className="p-10 text-center text-slate-300 font-bold uppercase text-[10px]">Carregando placar...</div>
         ) : list.map((u, i) => (
           <div key={u.uid} className="bg-white p-4 rounded-2xl flex items-center justify-between border border-slate-50 shadow-sm">
             <div className="flex items-center gap-4">
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-black ${i === 0 ? 'bg-amber-400 text-white shadow-lg shadow-amber-400/20' : i === 1 ? 'bg-slate-300 text-white' : i === 2 ? 'bg-orange-300 text-white' : 'bg-slate-100 text-slate-400'}`}>
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-black ${i === 0 ? 'bg-amber-400 text-white' : 'bg-slate-100 text-slate-400'}`}>
                 {i + 1}
               </div>
-              <div>
-                <p className="font-bold text-sm">{u.displayName}</p>
-                <p className="text-[9px] font-bold text-slate-400 uppercase">{(u.scores || []).length} PARTIDAS</p>
-              </div>
+              <span className="font-bold text-sm">{u.displayName}</span>
             </div>
             <div className="text-right">
               <p className="text-lg font-black text-emerald-600">{(u.scores || []).reduce((a, b) => a + b.points, 0)}</p>
@@ -449,25 +435,22 @@ const RankingView: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
 const ProfileView: React.FC<{ user: UserProfile, onBack: () => void }> = ({ user, onBack }) => (
   <div className="px-6 py-8 animate-app-in">
-    <div className="bg-slate-900 rounded-[2.5rem] p-8 text-center text-white mb-8 shadow-xl shadow-slate-900/20">
-      <div className="w-20 h-20 bg-emerald-500 rounded-3xl flex items-center justify-center text-white text-4xl font-black mx-auto mb-6 rotate-6 shadow-xl">
+    <div className="bg-slate-900 rounded-[2.5rem] p-8 text-center text-white mb-8">
+      <div className="w-20 h-20 bg-emerald-500 rounded-3xl flex items-center justify-center text-white text-4xl font-black mx-auto mb-6 rotate-6">
         {user.displayName[0].toUpperCase()}
       </div>
       <h2 className="text-2xl font-black uppercase italic tracking-tighter mb-1">{user.displayName}</h2>
       <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest">{user.email}</p>
     </div>
-    
     <div className="px-2">
-      <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Últimos Jogos</h3>
+      <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Seus Últimos Jogos</h3>
       <div className="space-y-3">
         {(!user.scores || user.scores.length === 0) ? (
-          <div className="p-10 border-2 border-dashed border-slate-200 rounded-3xl text-center text-slate-300 text-[10px] font-bold uppercase">Ainda não entrou em campo</div>
+          <div className="p-10 border-2 border-dashed border-slate-200 rounded-3xl text-center text-slate-300 text-[10px] font-bold uppercase">Nenhum jogo feito</div>
         ) : user.scores.slice(-5).reverse().map((s, i) => (
-          <div key={i} className="bg-white p-5 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm">
+          <div key={i} className="bg-white p-5 rounded-2xl border border-slate-100 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-emerald-500">
-                <Target size={20} />
-              </div>
+              <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-emerald-500"><Target size={20} /></div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-tight">{s.theme}</p>
                 <p className="text-[9px] text-slate-400 font-bold uppercase">{new Date(s.date).toLocaleDateString()}</p>
@@ -486,24 +469,21 @@ const AdminView: React.FC<{ onBack: any }> = ({ onBack }) => {
   useEffect(() => { db.getPendingQuestions().then(setPend); }, []);
   return (
     <div className="px-6 py-6 animate-app-in">
-      <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8">Central do VAR</h2>
+      <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8">VAR</h2>
       <div className="space-y-4">
         {pend.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="text-5xl mb-4">⛳</div>
-            <p className="text-slate-300 font-bold uppercase text-[10px] tracking-widest">Tudo limpo no VAR</p>
-          </div>
+          <p className="text-center py-20 text-slate-300 font-bold uppercase text-[10px]">Tudo limpo no VAR</p>
         ) : pend.map(q => (
           <div key={q.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
             <p className="font-bold text-sm mb-4 leading-tight">"{q.text}"</p>
             <div className="flex gap-2">
-              <button onClick={() => db.approveQuestion(q.id).then(() => setPend(p => p.filter(x => x.id !== q.id)))} className="flex-1 py-3 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic">Aprovar</button>
-              <button onClick={() => db.deleteQuestion(q.id).then(() => setPend(p => p.filter(x => x.id !== q.id)))} className="flex-1 py-3 bg-red-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic">Recusar</button>
+              <button onClick={() => db.approveQuestion(q.id).then(() => setPend(p => p.filter(x => x.id !== q.id)))} className="flex-1 py-3 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase italic">Aprovar</button>
+              <button onClick={() => db.deleteQuestion(q.id).then(() => setPend(p => p.filter(x => x.id !== q.id)))} className="flex-1 py-3 bg-red-500 text-white rounded-xl text-[10px] font-black uppercase italic">Recusar</button>
             </div>
           </div>
         ))}
       </div>
-      <button onClick={onBack} className="mt-10 w-full text-slate-400 font-bold uppercase text-[10px] tracking-[0.4em] active:text-slate-600 transition-colors">Voltar</button>
+      <button onClick={onBack} className="mt-10 w-full text-slate-400 font-bold uppercase text-[10px] tracking-[0.4em]">Sair do VAR</button>
     </div>
   );
 };
@@ -518,10 +498,10 @@ const SuggestView: React.FC<{ user: UserProfile, onBack: any }> = ({ user, onBac
     await db.saveQuestion({
       id: Date.now().toString(),
       text,
-      options: [correct, 'Opção Errada 1', 'Opção Errada 2', 'Opção Errada 3'].sort(() => Math.random() - 0.5),
+      options: [correct, 'Opção 1', 'Opção 2', 'Opção 3'].sort(() => Math.random() - 0.5),
       correctAnswer: correct,
       theme: Theme.MUNDIAL,
-      subtheme: 'Sugestão do Usuário',
+      subtheme: 'Sugestão',
       difficulty: Difficulty.MEDIO,
       approved: false,
       suggestedBy: user.email
@@ -532,9 +512,9 @@ const SuggestView: React.FC<{ user: UserProfile, onBack: any }> = ({ user, onBac
   if (done) return (
     <div className="px-8 py-20 text-center animate-app-in">
       <div className="text-6xl mb-6">✅</div>
-      <h2 className="text-2xl font-black italic uppercase mb-2">Sugestão Enviada!</h2>
-      <p className="text-slate-400 text-sm mb-10">Sua pergunta será analisada pelo VAR em breve.</p>
-      <button onClick={onBack} className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest italic shadow-xl active:scale-95 transition-all">Continuar</button>
+      <h2 className="text-2xl font-black italic uppercase mb-2 text-slate-900">Enviado!</h2>
+      <p className="text-slate-400 text-sm mb-10">Sua pergunta está em análise no VAR.</p>
+      <button onClick={onBack} className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase italic shadow-xl">Entendido</button>
     </div>
   );
 
@@ -542,15 +522,9 @@ const SuggestView: React.FC<{ user: UserProfile, onBack: any }> = ({ user, onBac
     <div className="px-6 py-8 animate-app-in">
       <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8">Sugerir Lance</h2>
       <form onSubmit={sub} className="space-y-4">
-        <div className="space-y-1">
-          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Sua Pergunta</label>
-          <textarea required className="w-full p-4 bg-white border border-slate-100 rounded-2xl outline-none font-bold min-h-[120px] focus:border-emerald-500 transition-all" placeholder="Ex: Em que ano o Pelé estreou em Copas?" value={text} onChange={e => setText(e.target.value)} />
-        </div>
-        <div className="space-y-1">
-          <label className="text-[10px] font-black uppercase tracking-widest text-emerald-600 ml-2">Resposta Certa</label>
-          <input required className="w-full p-4 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-2xl outline-none font-black" placeholder="A resposta correta" value={correct} onChange={e => setCorrect(e.target.value)} />
-        </div>
-        <button className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest italic shadow-xl mt-4 active:scale-95 transition-all">Enviar ao VAR</button>
+        <textarea required className="w-full p-4 bg-white border border-slate-100 rounded-2xl outline-none font-bold min-h-[120px]" placeholder="Sua pergunta..." value={text} onChange={e => setText(e.target.value)} />
+        <input required className="w-full p-4 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-2xl outline-none font-black" placeholder="Resposta Correta" value={correct} onChange={e => setCorrect(e.target.value)} />
+        <button className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase italic shadow-xl mt-4">Mandar pro VAR</button>
       </form>
     </div>
   );

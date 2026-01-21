@@ -1,12 +1,6 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-
-// Shim para evitar ReferenceError em navegadores
-if (typeof (window as any).process === 'undefined') {
-  (window as any).process = { env: {} };
-}
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
