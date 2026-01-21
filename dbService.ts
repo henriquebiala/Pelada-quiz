@@ -1,166 +1,119 @@
 
 import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { 
+  getAuth, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile 
+} from "firebase/auth";
 import { 
   getFirestore, collection, addDoc, getDocs, query, where, 
-  updateDoc, doc, setDoc, getDoc, deleteDoc, orderBy, limit 
+  updateDoc, doc, setDoc, getDoc, deleteDoc
 } from "firebase/firestore";
 import { firebaseConfig } from "./firebaseConfig";
-import { Question, Theme, Difficulty, UserProfile } from './types';
+import { Question, Theme, UserProfile } from './types';
 
 // Inicialização do Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const firestore = getFirestore(app);
 
-const USER_SESSION_KEY = 'pelada_session';
+const USER_SESSION_KEY = 'pelada_session_v2';
 
 export const db = {
-  // --- QUESTÕES (Firestore) ---
-  getQuestions: async (theme?: Theme, onlyApproved: boolean = true): Promise<Question[]> => {
+  // --- QUESTÕES ---
+  getQuestions: async (theme: Theme): Promise<Question[]> => {
     try {
       const qRef = collection(firestore, "questions");
-      let q;
-      
-      if (theme) {
-        q = query(qRef, where("theme", "==", theme));
-      } else {
-        q = qRef;
-      }
-
-      const querySnapshot = await getDocs(q);
-      let questions = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Question));
-      
-      if (onlyApproved) {
-        questions = questions.filter(q => q.approved);
-      }
-      
-      return questions; 
+      const q = query(qRef, where("theme", "==", theme), where("approved", "==", true));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({ id: d.id, ...d.data() } as Question));
     } catch (e) {
-      console.error("Erro ao buscar questões:", e);
+      console.error("Erro Firestore:", e);
       return [];
     }
   },
 
   getPendingQuestions: async (): Promise<Question[]> => {
-    try {
-      const q = query(collection(firestore, "questions"), where("approved", "==", false));
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Question));
-    } catch (e) {
-      return [];
-    }
+    const q = query(collection(firestore, "questions"), where("approved", "==", false));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() } as Question));
   },
 
-  saveQuestion: async (question: Question): Promise<void> => {
-    try {
-      const { id, ...data } = question;
-      await addDoc(collection(firestore, "questions"), {
-        ...data,
-        approved: question.approved || false,
-        createdAt: new Date().toISOString()
-      });
-    } catch (e) {
-      console.error("Erro ao salvar questão:", e);
-    }
+  saveQuestion: async (q: Question) => {
+    const { id, ...data } = q;
+    await addDoc(collection(firestore, "questions"), { ...data, createdAt: new Date().toISOString() });
   },
 
-  approveQuestion: async (id: string): Promise<void> => {
-    const docRef = doc(firestore, "questions", id);
-    await updateDoc(docRef, { approved: true });
+  approveQuestion: async (id: string) => {
+    await updateDoc(doc(firestore, "questions", id), { approved: true });
   },
 
-  deleteQuestion: async (id: string): Promise<void> => {
+  deleteQuestion: async (id: string) => {
     await deleteDoc(doc(firestore, "questions", id));
   },
 
-  // --- USUÁRIOS & PERFIL ---
+  // --- AUTH ---
+  login: async (email: string, pass: string): Promise<UserProfile | null> => {
+    const res = await signInWithEmailAndPassword(auth, email, pass);
+    return await db.getUserFromFirestore(res.user.uid);
+  },
+
+  register: async (email: string, pass: string, name: string): Promise<UserProfile | null> => {
+    const res = await createUserWithEmailAndPassword(auth, email, pass);
+    await updateProfile(res.user, { displayName: name });
+    const profile: UserProfile = {
+      uid: res.user.uid,
+      email,
+      displayName: name,
+      role: email === 'admin@bola.com' ? 'admin' : 'user',
+      scores: []
+    };
+    await db.syncUserToFirestore(profile);
+    return profile;
+  },
+
+  logout: async () => {
+    await signOut(auth);
+    localStorage.removeItem(USER_SESSION_KEY);
+  },
+
+  // --- PERFIL ---
   getCurrentUser: (): UserProfile | null => {
     const raw = localStorage.getItem(USER_SESSION_KEY);
     return raw ? JSON.parse(raw) : null;
   },
 
   setCurrentUser: (user: UserProfile | null) => {
-    if (user) {
-      localStorage.setItem(USER_SESSION_KEY, JSON.stringify(user));
-      db.syncUserToFirestore(user);
-    } else {
-      localStorage.removeItem(USER_SESSION_KEY);
-    }
+    if (user) localStorage.setItem(USER_SESSION_KEY, JSON.stringify(user));
+    else localStorage.removeItem(USER_SESSION_KEY);
   },
 
   syncUserToFirestore: async (user: UserProfile) => {
-    try {
-      const userRef = doc(firestore, "users", user.uid);
-      await setDoc(userRef, user, { merge: true });
-    } catch (e) {
-      console.error("Erro na sincronização:", e);
-    }
+    await setDoc(doc(firestore, "users", user.uid), user, { merge: true });
   },
 
   getUserFromFirestore: async (uid: string): Promise<UserProfile | null> => {
-    try {
-      const docRef = doc(firestore, "users", uid);
-      const docSnap = await getDoc(docRef);
-      return docSnap.exists() ? (docSnap.data() as UserProfile) : null;
-    } catch (e) {
-      return null;
-    }
-  },
-
-  getAllUsers: async (): Promise<UserProfile[]> => {
-    const querySnapshot = await getDocs(collection(firestore, "users"));
-    return querySnapshot.docs.map(doc => doc.data() as UserProfile);
+    const snap = await getDoc(doc(firestore, "users", uid));
+    return snap.exists() ? (snap.data() as UserProfile) : null;
   },
 
   getGlobalRanking: async (): Promise<UserProfile[]> => {
-    try {
-      const querySnapshot = await getDocs(collection(firestore, "users"));
-      const users = querySnapshot.docs.map(doc => doc.data() as UserProfile);
-      
-      // Ordena usuários pela soma total de pontos
-      return users.sort((a, b) => {
-        const totalA = (a.scores || []).reduce((acc, curr) => acc + curr.points, 0);
-        const totalB = (b.scores || []).reduce((acc, curr) => acc + curr.points, 0);
-        return totalB - totalA;
-      }).slice(0, 10); // Top 10
-    } catch (e) {
-      return [];
-    }
-  },
-
-  toggleUserAdmin: async (uid: string) => {
-    const userRef = doc(firestore, "users", uid);
-    const userDoc = await getDoc(userRef);
-    if (userDoc.exists()) {
-      const userData = userDoc.data() as UserProfile;
-      const newRole = userData.role === 'admin' ? 'user' : 'admin';
-      await updateDoc(userRef, { role: newRole });
-      
-      const current = db.getCurrentUser();
-      if (current && current.uid === uid) {
-        db.setCurrentUser({ ...current, role: newRole });
-      }
-    }
+    const snap = await getDocs(collection(firestore, "users"));
+    const users = snap.docs.map(d => d.data() as UserProfile);
+    return users.sort((a, b) => {
+      const sumA = (a.scores || []).reduce((acc, curr) => acc + curr.points, 0);
+      const sumB = (b.scores || []).reduce((acc, curr) => acc + curr.points, 0);
+      return sumB - sumA;
+    }).slice(0, 10);
   },
 
   saveScore: async (uid: string, theme: Theme, points: number) => {
     const userRef = doc(firestore, "users", uid);
-    const userDoc = await getDoc(userRef);
-    if (userDoc.exists()) {
-      const userData = userDoc.data() as UserProfile;
-      const newScores = [...(userData.scores || []), { theme, points, date: new Date().toISOString() }];
+    const snap = await getDoc(userRef);
+    if (snap.exists()) {
+      const data = snap.data() as UserProfile;
+      const newScores = [...(data.scores || []), { theme, points, date: new Date().toISOString() }];
       await updateDoc(userRef, { scores: newScores });
-      
       const current = db.getCurrentUser();
-      if (current && current.uid === uid) {
-        db.setCurrentUser({ ...current, scores: newScores });
-      }
+      if (current && current.uid === uid) db.setCurrentUser({ ...current, scores: newScores });
     }
-  },
-
-  logout: async () => {
-    await signOut(auth);
-    localStorage.removeItem(USER_SESSION_KEY);
   }
 };
