@@ -32,17 +32,14 @@
           flex-direction: column;
           position: relative;
         }
-        /* Efeito de clique mobile */
         button:active {
           transform: scale(0.96);
         }
-        /* Ajuste para telas pequenas */
         @media (max-width: 480px) {
           #root {
             box-shadow: none;
           }
         }
-        /* Scrollbar discreta */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
@@ -53,7 +50,7 @@
         }
         .animate-app-in { animation: fadeIn 0.4s ease-out forwards; }
     </style>
-    <script type="importmap">
+<script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@19.0.0",

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Trophy, Home, Settings, LogOut, ShieldCheck, User, MessageSquarePlus, 
   Play, CheckCircle, XCircle, Star, Target, Volume2, VolumeX, 
-  Globe, LayoutGrid, ChevronRight, Zap, Award
+  Globe, LayoutGrid, ChevronRight, Zap, Award, Code, Microscope
 } from 'lucide-react';
 import { onAuthStateChanged } from "firebase/auth";
 import { Theme, Question, UserProfile, Difficulty } from './types';
@@ -14,31 +14,6 @@ const SOUND_URLS = {
   correct: 'https://assets.mixkit.co/active_storage/sfx/600/600-preview.mp3',
   incorrect: 'https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3',
   next: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'
-};
-
-const STARTER_QUESTIONS: Record<string, Question[]> = {
-  default: [
-    {
-      id: 'start-1',
-      text: 'Qual jogador tem mais Bolas de Ouro na história?',
-      options: ['Cristiano Ronaldo', 'Lionel Messi', 'Pelé', 'Zidane'],
-      correctAnswer: 'Lionel Messi',
-      theme: Theme.MUNDIAL,
-      subtheme: 'História',
-      difficulty: Difficulty.FACIL,
-      approved: true
-    },
-    {
-      id: 'start-2',
-      text: 'Quem venceu a Copa do Mundo de 2022?',
-      options: ['França', 'Brasil', 'Argentina', 'Alemanha'],
-      correctAnswer: 'Argentina',
-      theme: Theme.MUNDIAL,
-      subtheme: 'Copa do Mundo',
-      difficulty: Difficulty.FACIL,
-      approved: true
-    }
-  ]
 };
 
 const App: React.FC = () => {
@@ -89,11 +64,21 @@ const App: React.FC = () => {
     if (a) { a.currentTime = 0; a.play().catch(() => {}); }
   };
 
+  const Credits = () => (
+    <div className="mt-auto py-8 px-6 text-center border-t border-slate-100 bg-slate-50/50">
+      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Créditos de Desenvolvimento</p>
+      <div className="flex flex-col gap-1">
+        <p className="text-[11px] font-bold text-slate-600"><span className="text-emerald-600">Desenvolvido por</span> Henrique Biala</p>
+        <p className="text-[11px] font-bold text-slate-600"><span className="text-emerald-600">Testado por</span> Rúben Barros & Ermenegildo Perez</p>
+      </div>
+    </div>
+  );
+
   if (isInitializing) return (
     <div className="flex flex-col items-center justify-center h-screen bg-slate-900 text-white p-6 text-center">
       <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-6"></div>
       <h1 className="text-2xl font-black uppercase italic tracking-tighter">Bom de Bola</h1>
-      <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest mt-2 animate-pulse">Aquecendo para o jogo...</p>
+      <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest mt-2 animate-pulse">Entrando em campo...</p>
     </div>
   );
 
@@ -103,7 +88,6 @@ const App: React.FC = () => {
         <AuthView onLogin={(u) => { setUser(u); setView('home'); }} />
       ) : (
         <>
-          {/* Header Mobile */}
           <header className="px-5 py-4 flex justify-between items-center bg-white border-b border-slate-100 sticky top-0 z-50">
             <div className="flex items-center gap-3" onClick={() => setView('home')}>
               <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-600/20 rotate-3">
@@ -117,20 +101,29 @@ const App: React.FC = () => {
           </header>
 
           <main className="flex-1 pb-24 overflow-y-auto">
-            <div className="animate-app-in">
-              {view === 'home' && <HomeView onSelectTheme={(t) => { setSelectedTheme(t); setView('quiz'); }} />}
+            <div className="animate-app-in min-h-full flex flex-col">
+              {view === 'home' && (
+                <>
+                  <HomeView onSelectTheme={(t) => { setSelectedTheme(t); setView('quiz'); }} />
+                  <Credits />
+                </>
+              )}
               {view === 'quiz' && selectedTheme && <QuizView theme={selectedTheme} onFinish={s => { setFinalScore(s); db.saveScore(user.uid, selectedTheme, s); setView('results'); }} onGameOver={s => { setFinalScore(s); db.saveScore(user.uid, selectedTheme, s); setView('gameover'); }} playSound={playSound} />}
               {view === 'results' && <ResultsView score={finalScore} onRestart={() => setView('home')} />}
               {view === 'gameover' && <GameOverView score={finalScore} onRestart={() => setView('home')} />}
               {view === 'ranking' && <RankingView onBack={() => setView('home')} />}
               {view === 'profile' && <ProfileView user={user} onBack={() => setView('home')} />}
-              {view === 'settings' && <SettingsView user={user} onToggleMute={() => setIsMuted(!isMuted)} isMuted={isMuted} setView={setView} onLogout={() => { db.logout(); setUser(null); }} />}
+              {view === 'settings' && (
+                <>
+                  <SettingsView user={user} onToggleMute={() => setIsMuted(!isMuted)} isMuted={isMuted} setView={setView} onLogout={() => { db.logout(); setUser(null); }} />
+                  <Credits />
+                </>
+              )}
               {view === 'suggest' && <SuggestView user={user} onBack={() => setView('home')} />}
               {view === 'admin' && <AdminView onBack={() => setView('settings')} />}
             </div>
           </main>
 
-          {/* Navigation Tab Bar */}
           {['home', 'ranking', 'profile'].includes(view) && (
             <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white border-t border-slate-100 px-6 py-3 flex justify-around items-center z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
               <button onClick={() => setView('home')} className={`flex flex-col items-center gap-1 transition-colors ${view === 'home' ? 'text-emerald-600' : 'text-slate-400'}`}>
@@ -153,8 +146,6 @@ const App: React.FC = () => {
   );
 };
 
-// --- Sub-views ---
-
 const AuthView: React.FC<{ onLogin: (u: UserProfile) => void }> = ({ onLogin }) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
@@ -168,7 +159,7 @@ const AuthView: React.FC<{ onLogin: (u: UserProfile) => void }> = ({ onLogin }) 
     try {
       const u = isSignUp ? await db.register(email, pass, name) : await db.login(email, pass);
       if (u) onLogin(u);
-    } catch(err) { alert("Credenciais inválidas. Tente novamente."); }
+    } catch(err) { alert("Credenciais inválidas."); }
     setLoad(false);
   };
 
@@ -185,7 +176,7 @@ const AuthView: React.FC<{ onLogin: (u: UserProfile) => void }> = ({ onLogin }) 
         <input required className="w-full p-4 bg-slate-100 rounded-2xl outline-none border-2 border-transparent focus:border-emerald-500 font-bold" placeholder="E-mail" type="email" value={email} onChange={e => setEmail(e.target.value)} />
         <input required className="w-full p-4 bg-slate-100 rounded-2xl outline-none border-2 border-transparent focus:border-emerald-500 font-bold" placeholder="Sua Senha" type="password" value={pass} onChange={e => setPass(e.target.value)} />
         <button disabled={load} className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest italic shadow-xl shadow-emerald-600/20 active:scale-95 transition-all">
-          {load ? 'Entrando no campo...' : isSignUp ? 'Criar Perfil' : 'Entrar em Campo'}
+          {load ? 'Entrando...' : isSignUp ? 'Criar Perfil' : 'Entrar em Campo'}
         </button>
       </form>
       
@@ -197,7 +188,7 @@ const AuthView: React.FC<{ onLogin: (u: UserProfile) => void }> = ({ onLogin }) 
 };
 
 const HomeView: React.FC<{ onSelectTheme: (t: Theme) => void }> = ({ onSelectTheme }) => (
-  <div className="px-5 py-6 space-y-8">
+  <div className="px-5 py-6 space-y-8 flex-1">
     <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-slate-900/40">
       <div className="absolute -right-6 -bottom-6 opacity-10 rotate-12">
         <Trophy size={180} />
@@ -215,7 +206,7 @@ const HomeView: React.FC<{ onSelectTheme: (t: Theme) => void }> = ({ onSelectThe
     <div>
       <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 px-2">Escolha seu Estádio</h3>
       <div className="grid grid-cols-1 gap-3">
-        {Object.values(Theme).slice(0, 3).map(t => (
+        {Object.values(Theme).map(t => (
           <button key={t} onClick={() => onSelectTheme(t)} className="flex items-center justify-between p-5 bg-white rounded-3xl border border-slate-100 shadow-sm active:scale-98 transition-all hover:border-emerald-200">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-emerald-600">
@@ -242,14 +233,22 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
     const loadQs = async () => {
       setLoad(true);
       try {
-        let items = await db.getQuestions(theme);
-        if (items.length < 3) {
-          const aiItems = await generateQuestions(theme, 8);
-          items = aiItems.length > 0 ? aiItems : STARTER_QUESTIONS.default;
+        // Tentamos carregar 15 perguntas via IA
+        const aiItems = await generateQuestions(theme, 15);
+        if (aiItems.length > 0) {
+          // Ordenamos por dificuldade para garantir a progressão no jogo
+          const sorted = aiItems.sort((a, b) => {
+            const order = { 'fácil': 1, 'médio': 2, 'difícil': 3 };
+            return order[a.difficulty as keyof typeof order] - order[b.difficulty as keyof typeof order];
+          });
+          setQs(sorted);
+        } else {
+           // Fallback se falhar
+           const fallback = await db.getQuestions(theme);
+           setQs(fallback.length >= 3 ? fallback : []);
         }
-        setQs(items.sort(() => Math.random() - 0.5));
       } catch(e) { 
-        setQs(STARTER_QUESTIONS.default); 
+        console.error("Erro ao carregar perguntas:", e);
       }
       setLoad(false);
     };
@@ -275,7 +274,7 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
   if (load) return (
     <div className="h-[60vh] flex flex-col items-center justify-center">
       <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Escalando o time...</p>
+      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Preparando as 15 rodadas...</p>
     </div>
   );
 
@@ -286,8 +285,8 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
     <div className="px-5 py-4 h-full flex flex-col">
       <div className="flex justify-between items-center mb-6 px-1">
         <div className="flex items-center gap-2">
-           <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{theme}</span>
+           <div className={`w-2 h-2 rounded-full animate-pulse ${q.difficulty === 'fácil' ? 'bg-emerald-400' : q.difficulty === 'médio' ? 'bg-amber-400' : 'bg-red-400'}`}></div>
+           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{theme} • {q.difficulty}</span>
         </div>
         <span className="text-xs font-black text-slate-900">QUESTÃO {idx + 1}/{qs.length}</span>
       </div>
@@ -320,9 +319,9 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
         </div>
       </div>
 
-      <div className="text-center">
+      <div className="text-center mt-auto pb-4">
         <p className="text-3xl font-black text-emerald-600 leading-none">{idx * 10}</p>
-        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">PONTOS ACUMULADOS</p>
+        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">PONTOS NA PARTIDA</p>
       </div>
     </div>
   );
@@ -332,7 +331,7 @@ const ResultsView: React.FC<{ score: number, onRestart: () => void }> = ({ score
   <div className="px-8 py-12 flex-1 flex flex-col justify-center items-center text-center">
     <div className="text-8xl mb-6">🏆</div>
     <h2 className="text-4xl font-black italic uppercase tracking-tighter mb-2">GOLAÇO!</h2>
-    <p className="text-slate-400 font-bold text-sm mb-10">Você dominou a partida hoje.</p>
+    <p className="text-slate-400 font-bold text-sm mb-10">Você completou as 15 rodadas!</p>
     <div className="bg-emerald-600 w-full p-8 rounded-[3rem] text-white shadow-2xl shadow-emerald-600/30 mb-10">
       <p className="text-6xl font-black">{score}</p>
       <p className="text-[10px] font-bold uppercase tracking-widest mt-2 opacity-70">Sua Pontuação</p>
@@ -345,17 +344,17 @@ const GameOverView: React.FC<{ score: number, onRestart: () => void }> = ({ scor
   <div className="px-8 py-12 flex-1 flex flex-col justify-center items-center text-center">
     <div className="text-8xl mb-6">🟥</div>
     <h2 className="text-4xl font-black italic uppercase tracking-tighter mb-2 text-red-600">FIM DE JOGO!</h2>
-    <p className="text-slate-400 font-bold text-sm mb-10">O juiz apitou o fim da partida.</p>
+    <p className="text-slate-400 font-bold text-sm mb-10">O juiz apitou o fim prematuro.</p>
     <div className="bg-red-50 w-full p-8 rounded-[3rem] border-2 border-red-100 mb-10">
       <p className="text-6xl font-black text-red-600">{score}</p>
-      <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-red-400">Pontos Finais</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-red-400">Pontos Marcados</p>
     </div>
     <button onClick={onRestart} className="w-full py-5 bg-red-600 text-white rounded-2xl font-black uppercase tracking-widest italic shadow-xl">Tentar Revanche</button>
   </div>
 );
 
 const SettingsView: React.FC<{ user: UserProfile, onToggleMute: any, isMuted: boolean, setView: any, onLogout: any }> = ({ user, onToggleMute, isMuted, setView, onLogout }) => (
-  <div className="px-6 py-8">
+  <div className="px-6 py-8 flex-1 flex flex-col">
     <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8 px-2">Configurações</h2>
     <div className="space-y-3">
       <button onClick={onToggleMute} className="w-full p-5 bg-white rounded-3xl flex items-center justify-between border border-slate-100 shadow-sm">
@@ -520,7 +519,7 @@ const SuggestView: React.FC<{ user: UserProfile, onBack: any }> = ({ user, onBac
       <form onSubmit={sub} className="space-y-4">
         <div className="space-y-1">
           <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Pergunta</label>
-          <textarea required className="w-full p-4 bg-white border border-slate-100 rounded-2xl outline-none font-bold min-h-[120px] focus:border-emerald-500 transition-all" placeholder="Ex: Quem marcou o gol do título angolano?" value={text} onChange={e => setText(e.target.value)} />
+          <textarea required className="w-full p-4 bg-white border border-slate-100 rounded-2xl outline-none font-bold min-h-[120px] focus:border-emerald-500 transition-all" placeholder="Ex: Quem marcou o gol do título?" value={text} onChange={e => setText(e.target.value)} />
         </div>
         <div className="space-y-1">
           <label className="text-[10px] font-black uppercase tracking-widest text-emerald-600 ml-2">Resposta Correta</label>
