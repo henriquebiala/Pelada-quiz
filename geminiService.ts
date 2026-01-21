@@ -1,22 +1,24 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { Theme, Question, Difficulty } from "./types";
 
-const getAIClient = () => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) throw new Error("Chave Gemini não configurada.");
-  return new GoogleGenAI({ apiKey });
-};
-
-export const generateQuestions = async (theme: Theme, count: number = 15): Promise<Question[]> => {
+export const generateQuestions = async (theme: Theme, count: number = 10): Promise<Question[]> => {
   try {
-    const ai = getAIClient();
+    // Busca a chave de várias fontes possíveis para evitar erro 'process is not defined'
+    const apiKey = (window as any).process?.env?.API_KEY || (globalThis as any).API_KEY;
+    
+    if (!apiKey) {
+      console.warn("Gemini: API_KEY não configurada. O jogo usará perguntas locais.");
+      return [];
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+    
     const response = await ai.models.generateContent({
-      model: "gemini-flash-latest",
-      contents: `Gere exatamente ${count} perguntas reais e históricas sobre ${theme}. 
-      Distribuição: 5 fáceis, 5 médias, 5 difíceis.
-      Foque em curiosidades, recordes e história real (incluindo Girabola e futebol angolano se o tema for Angolano).`,
+      model: "gemini-3-flash-preview",
+      contents: `Gere ${count} perguntas reais sobre: ${theme}. 4 opções. JSON puro.`,
       config: {
-        systemInstruction: "Você é um historiador de futebol. Gere JSON estrito. Não use Markdown.",
+        systemInstruction: "Você é um historiador de futebol. Retorne apenas JSON.",
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.ARRAY,
@@ -35,15 +37,17 @@ export const generateQuestions = async (theme: Theme, count: number = 15): Promi
       }
     });
 
-    const parsed = JSON.parse(response.text || "[]");
-    return parsed.map((q: any) => ({
+    const text = response.text;
+    if (!text) return [];
+
+    return JSON.parse(text).map((q: any) => ({
       ...q,
       id: `ai-${Math.random().toString(36).substr(2, 9)}`,
       theme,
       approved: true
     }));
   } catch (error) {
-    console.error("Gemini falhou:", error);
+    console.error("Erro Gemini:", error);
     return [];
   }
 };
