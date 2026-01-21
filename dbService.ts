@@ -54,7 +54,7 @@ export const db = {
 
   saveQuestion: async (question: Question): Promise<void> => {
     try {
-      const { id, ...data } = question; // Não salvar o ID local como campo se o Firestore gerar um
+      const { id, ...data } = question;
       await addDoc(collection(firestore, "questions"), {
         ...data,
         approved: question.approved || false,
@@ -111,6 +111,22 @@ export const db = {
   getAllUsers: async (): Promise<UserProfile[]> => {
     const querySnapshot = await getDocs(collection(firestore, "users"));
     return querySnapshot.docs.map(doc => doc.data() as UserProfile);
+  },
+
+  getGlobalRanking: async (): Promise<UserProfile[]> => {
+    try {
+      const querySnapshot = await getDocs(collection(firestore, "users"));
+      const users = querySnapshot.docs.map(doc => doc.data() as UserProfile);
+      
+      // Ordena usuários pela soma total de pontos
+      return users.sort((a, b) => {
+        const totalA = (a.scores || []).reduce((acc, curr) => acc + curr.points, 0);
+        const totalB = (b.scores || []).reduce((acc, curr) => acc + curr.points, 0);
+        return totalB - totalA;
+      }).slice(0, 10); // Top 10
+    } catch (e) {
+      return [];
+    }
   },
 
   toggleUserAdmin: async (uid: string) => {

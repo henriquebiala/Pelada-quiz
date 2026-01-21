@@ -1,31 +1,29 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { Theme, Difficulty, Question } from "./types";
+import { Theme, Question } from "./types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-export const generateQuestions = async (theme: Theme, count: number = 5): Promise<Question[]> => {
-  // Otimização do prompt para velocidade máxima
-  const prompt = `Gere ${count} perguntas CURTAS e REAIS de futebol sobre "${theme}". 
-  Foque em fatos históricos e curiosidades. 
-  Angola: Girabola e Palancas. 
-  África: CAN e CAF. 
-  Mundial: Copas e Lendas.`;
-
+export const generateQuestions = async (theme: Theme, count: number = 8): Promise<Question[]> => {
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: prompt,
+      contents: `Gere ${count} perguntas sobre ${theme}. Foque em curiosidades e fatos históricos marcantes.`,
       config: {
+        systemInstruction: "Você é um historiador especialista em futebol mundial, africano e angolano. Gere perguntas reais, desafiadoras e curtas. Para o futebol angolano, mencione Girabola e ídolos como Akwá ou Mantorras. Para o africano, mencione a CAN. O formato deve ser JSON estrito.",
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.ARRAY,
           items: {
             type: Type.OBJECT,
             properties: {
-              text: { type: Type.STRING },
-              options: { type: Type.ARRAY, items: { type: Type.STRING } },
-              correctAnswer: { type: Type.STRING },
+              text: { type: Type.STRING, description: "O enunciado da pergunta." },
+              options: { 
+                type: Type.ARRAY, 
+                items: { type: Type.STRING },
+                description: "4 opções de resposta."
+              },
+              correctAnswer: { type: Type.STRING, description: "A opção correta exatamente como escrita no array de options." },
               subtheme: { type: Type.STRING },
               difficulty: { type: Type.STRING, enum: ["fácil", "médio", "difícil"] }
             },
@@ -35,7 +33,7 @@ export const generateQuestions = async (theme: Theme, count: number = 5): Promis
       }
     });
 
-    const parsed = JSON.parse(response.text);
+    const parsed = JSON.parse(response.text || "[]");
     return parsed.map((q: any) => ({
       ...q,
       id: `ai-${Math.random().toString(36).substr(2, 9)}`,
