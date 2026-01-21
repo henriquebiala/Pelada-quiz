@@ -12,11 +12,36 @@ const FALLBACK_QUESTIONS: Record<string, Question[]> = {
   [Theme.MUNDIAL]: [
     { id: 'f1', text: 'Quem ganhou a Copa do Mundo de 2022?', options: ['Brasil', 'França', 'Argentina', 'Alemanha'], correctAnswer: 'Argentina', theme: Theme.MUNDIAL, subtheme: 'Copa do Mundo', difficulty: Difficulty.FACIL, approved: true },
     { id: 'f2', text: 'Qual jogador tem mais Bolas de Ouro na história?', options: ['Pelé', 'Cristiano Ronaldo', 'Lionel Messi', 'Zidane'], correctAnswer: 'Lionel Messi', theme: Theme.MUNDIAL, subtheme: 'Prêmios', difficulty: Difficulty.FACIL, approved: true },
-    { id: 'f3', text: 'Em que país foi inventado o futebol moderno?', options: ['Brasil', 'Inglaterra', 'Itália', 'China'], correctAnswer: 'Inglaterra', theme: Theme.MUNDIAL, subtheme: 'História', difficulty: Difficulty.FACIL, approved: true }
+    { id: 'f3', text: 'Em que país foi inventado o futebol moderno?', options: ['Brasil', 'Inglaterra', 'Itália', 'China'], correctAnswer: 'Inglaterra', theme: Theme.MUNDIAL, subtheme: 'História', difficulty: Difficulty.FACIL, approved: true },
+    { id: 'f4', text: 'Qual seleção tem mais títulos de Copa do Mundo?', options: ['Alemanha', 'Itália', 'Brasil', 'Argentina'], correctAnswer: 'Brasil', theme: Theme.MUNDIAL, subtheme: 'Copa do Mundo', difficulty: Difficulty.FACIL, approved: true },
+    { id: 'f5', text: 'Quem venceu a Champions League 2022/23?', options: ['Real Madrid', 'Inter de Milão', 'Manchester City', 'Liverpool'], correctAnswer: 'Manchester City', theme: Theme.MUNDIAL, subtheme: 'Clubes', difficulty: Difficulty.FACIL, approved: true },
+    { id: 'f6', text: 'Qual era o primeiro clube profissional de Cristiano Ronaldo?', options: ['Man United', 'Real Madrid', 'Sporting CP', 'Juventus'], correctAnswer: 'Sporting CP', theme: Theme.MUNDIAL, subtheme: 'Jogadores', difficulty: Difficulty.MEDIO, approved: true },
+    { id: 'f7', text: 'Onde foi realizada a Copa do Mundo de 2014?', options: ['África do Sul', 'Rússia', 'Brasil', 'Alemanha'], correctAnswer: 'Brasil', theme: Theme.MUNDIAL, subtheme: 'Copa do Mundo', difficulty: Difficulty.MEDIO, approved: true },
+    { id: 'f8', text: 'Em que ano aconteceu o "Maracanazo"?', options: ['1950', '1954', '1958', '1962'], correctAnswer: '1950', theme: Theme.MUNDIAL, subtheme: 'História', difficulty: Difficulty.MEDIO, approved: true },
+    { id: 'f9', text: 'Quem venceu a Eurocopa 2024?', options: ['Inglaterra', 'França', 'Espanha', 'Portugal'], correctAnswer: 'Espanha', theme: Theme.MUNDIAL, subtheme: 'Seleções', difficulty: Difficulty.MEDIO, approved: true },
+    { id: 'f10', text: 'Qual número Pelé imortalizou na Seleção Brasileira?', options: ['7', '9', '10', '11'], correctAnswer: '10', theme: Theme.MUNDIAL, subtheme: 'Jogadores', difficulty: Difficulty.MEDIO, approved: true },
+    { id: 'f11', text: 'Quem ganhou a primeira Copa do Mundo em 1930?', options: ['Brasil', 'Argentina', 'Uruguai', 'EUA'], correctAnswer: 'Uruguai', theme: Theme.MUNDIAL, subtheme: 'História', difficulty: Difficulty.DIFICIL, approved: true },
+    { id: 'f12', text: 'Quem marcou o "Gol do Século" contra a Inglaterra em 1986?', options: ['Pele', 'Maradona', 'Zico', 'Platini'], correctAnswer: 'Maradona', theme: Theme.MUNDIAL, subtheme: 'Jogadores', difficulty: Difficulty.DIFICIL, approved: true },
+    { id: 'f13', text: 'Qual o apelido histórico de Pelé?', options: ['Fenômeno', 'Rei do Futebol', 'Pérola Negra', 'Mestre'], correctAnswer: 'Rei do Futebol', theme: Theme.MUNDIAL, subtheme: 'Jogadores', difficulty: Difficulty.DIFICIL, approved: true },
+    { id: 'f14', text: 'Qual o nome do estádio do Real Madrid?', options: ['Camp Nou', 'Wanda Metropolitano', 'Santiago Bernabéu', 'Mestalla'], correctAnswer: 'Santiago Bernabéu', theme: Theme.MUNDIAL, subtheme: 'Clubes', difficulty: Difficulty.DIFICIL, approved: true },
+    { id: 'f15', text: 'Quem detém o recorde de mais gols em uma única edição de Copa?', options: ['Muller', 'Just Fontaine', 'Klose', 'Ronaldo'], correctAnswer: 'Just Fontaine', theme: Theme.MUNDIAL, subtheme: 'Recordes', difficulty: Difficulty.DIFICIL, approved: true }
   ],
   [Theme.ANGOLANO]: [
     { id: 'a1', text: 'Qual é o nome da principal liga de futebol em Angola?', options: ['Angolazão', 'Girabola', 'Liga Angola', 'Taça Independência'], correctAnswer: 'Girabola', theme: Theme.ANGOLANO, subtheme: 'Liga Nacional', difficulty: Difficulty.FACIL, approved: true },
-    { id: 'a2', text: 'Em que ano Angola participou pela primeira vez num Mundial?', options: ['2002', '2006', '2010', '1998'], correctAnswer: '2006', theme: Theme.ANGOLANO, subtheme: 'Seleção', difficulty: Difficulty.FACIL, approved: true }
+    { id: 'a2', text: 'Em que ano Angola participou pela primeira vez num Mundial?', options: ['2002', '2006', '2010', '1998'], correctAnswer: '2006', theme: Theme.ANGOLANO, subtheme: 'Seleção', difficulty: Difficulty.FACIL, approved: true },
+    { id: 'a3', text: 'Qual clube angolano tem mais títulos do Girabola?', options: ['1º de Agosto', 'Petro de Luanda', 'Sagrada Esperança', 'Interclube'], correctAnswer: 'Petro de Luanda', theme: Theme.ANGOLANO, subtheme: 'Clubes', difficulty: Difficulty.FACIL, approved: true },
+    { id: 'a4', text: 'Qual o apelido da seleção nacional de Angola?', options: ['Leões', 'Águias', 'Palancas Negras', 'Elefantes'], correctAnswer: 'Palancas Negras', theme: Theme.ANGOLANO, subtheme: 'Seleção', difficulty: Difficulty.FACIL, approved: true },
+    { id: 'a5', text: 'Em qual província fica o Estádio 11 de Novembro?', options: ['Benguela', 'Huíla', 'Luanda', 'Cabinda'], correctAnswer: 'Luanda', theme: Theme.ANGOLANO, subtheme: 'Infraestrutura', difficulty: Difficulty.FACIL, approved: true },
+    { id: 'a6', text: 'Quem é o lendário capitão de Angola no Mundial 2006?', options: ['Mantorras', 'Akwa', 'Flávio', 'Gilberto'], correctAnswer: 'Akwa', theme: Theme.ANGOLANO, subtheme: 'Jogadores', difficulty: Difficulty.MEDIO, approved: true },
+    { id: 'a7', text: 'Em que ano Angola organizou o CAN (Campeonato Africano)?', options: ['2008', '2010', '2012', '2014'], correctAnswer: '2010', theme: Theme.ANGOLANO, subtheme: 'História', difficulty: Difficulty.MEDIO, approved: true },
+    { id: 'a8', text: 'Pedro Mantorras brilhou em qual grande clube europeu?', options: ['Porto', 'Sporting', 'Benfica', 'Real Madrid'], correctAnswer: 'Benfica', theme: Theme.ANGOLANO, subtheme: 'Jogadores', difficulty: Difficulty.MEDIO, approved: true },
+    { id: 'a9', text: 'Qual clube representa a Polícia Nacional de Angola?', options: ['1º de Agosto', 'Petro', 'Interclube', 'Progresso'], correctAnswer: 'Interclube', theme: Theme.ANGOLANO, subtheme: 'Clubes', difficulty: Difficulty.MEDIO, approved: true },
+    { id: 'a10', text: 'Gelson Dala começou sua carreira em qual clube angolano?', options: ['Petro', '1º de Agosto', 'Kabuscorp', 'Recreativo do Libolo'], correctAnswer: '1º de Agosto', theme: Theme.ANGOLANO, subtheme: 'Jogadores', difficulty: Difficulty.MEDIO, approved: true },
+    { id: 'a11', text: 'Flávio Amado é ídolo histórico em qual gigante do Egito?', options: ['Zamalek', 'Al Ahly', 'Pyramids', 'Ismaily'], correctAnswer: 'Al Ahly', theme: Theme.ANGOLANO, subtheme: 'Jogadores', difficulty: Difficulty.DIFICIL, approved: true },
+    { id: 'a12', text: 'Qual foi o ano de fundação do Girabola?', options: ['1975', '1979', '1981', '1985'], correctAnswer: '1979', theme: Theme.ANGOLANO, subtheme: 'História', difficulty: Difficulty.DIFICIL, approved: true },
+    { id: 'a13', text: 'Qual a melhor classificação de Angola num CAN até hoje?', options: ['Campeão', 'Finalista', 'Quartos-de-final', 'Fase de Grupos'], correctAnswer: 'Quartos-de-final', theme: Theme.ANGOLANO, subtheme: 'Seleção', difficulty: Difficulty.DIFICIL, approved: true },
+    { id: 'a14', text: 'O 1º de Agosto pertence a qual instituição?', options: ['Polícia', 'Forças Armadas', 'Caminhos de Ferro', 'Petróleos'], correctAnswer: 'Forças Armadas', theme: Theme.ANGOLANO, subtheme: 'Clubes', difficulty: Difficulty.DIFICIL, approved: true },
+    { id: 'a15', text: 'Manucho Gonçalves jogou em qual gigante da Inglaterra?', options: ['Chelsea', 'Man United', 'Arsenal', 'Liverpool'], correctAnswer: 'Man United', theme: Theme.ANGOLANO, subtheme: 'Jogadores', difficulty: Difficulty.DIFICIL, approved: true }
   ]
 };
 
@@ -84,7 +109,7 @@ const App: React.FC = () => {
   if (isInitializing) return (
     <div className="flex flex-col items-center justify-center h-screen bg-slate-900 text-white p-6">
       <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-      <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 animate-pulse">Entrando no vestiário...</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 animate-pulse">Entrando em campo...</p>
     </div>
   );
 
@@ -239,6 +264,12 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
         if (items.length === 0) items = await db.getQuestions(theme);
         if (items.length === 0) items = FALLBACK_QUESTIONS[theme] || FALLBACK_QUESTIONS[Theme.MUNDIAL];
         
+        // Garantir que temos 15 se for fallback de teste ou completar com mundiais
+        if (items.length < 15 && items.length > 0) {
+            const filler = (FALLBACK_QUESTIONS[Theme.MUNDIAL]).filter(f => !items.find(it => it.text === f.text));
+            items = [...items, ...filler].slice(0, 15);
+        }
+
         const sorted = [...items].sort((a, b) => {
           const order: any = { 'fácil': 1, 'médio': 2, 'difícil': 3 };
           return (order[a.difficulty] || 0) - (order[b.difficulty] || 0);
@@ -272,7 +303,7 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
   if (load) return (
     <div className="h-[60vh] flex flex-col items-center justify-center p-6 text-center">
       <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Escalando o time...</p>
+      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest italic">A IA está escalando os craques...</p>
     </div>
   );
 
@@ -286,13 +317,13 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
         <span className="text-xs font-black text-slate-900 uppercase">RODADA {idx + 1}/{qs.length}</span>
       </div>
       <div className="w-full h-2 bg-slate-100 rounded-full mb-8 overflow-hidden">
-        <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${progress}%` }}></div>
+        <div className="h-full bg-emerald-500 transition-all duration-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]" style={{ width: `${progress}%` }}></div>
       </div>
       <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-50 flex flex-col items-center mb-6 flex-1 justify-center">
         <h3 className="text-xl font-black text-slate-800 text-center leading-tight mb-8">{q.text}</h3>
         <div className="w-full space-y-3">
           {q.options.map(o => (
-            <button key={o} onClick={() => handle(o)} disabled={!!feedback} className={`w-full p-5 rounded-2xl text-left font-bold transition-all border-2 text-sm ${selected === o ? 'border-emerald-500 scale-[0.98]' : 'border-slate-50 bg-slate-50'} ${feedback === 'correct' && o === q.correctAnswer ? '!bg-emerald-600 !text-white !border-emerald-600' : ''} ${feedback === 'incorrect' && selected === o ? '!bg-red-500 !text-white !border-red-500' : ''}`}>{o}</button>
+            <button key={o} onClick={() => handle(o)} disabled={!!feedback} className={`w-full p-5 rounded-2xl text-left font-bold transition-all border-2 text-sm ${selected === o ? 'border-emerald-500 scale-[0.98]' : 'border-slate-50 bg-slate-50'} ${feedback === 'correct' && o === q.correctAnswer ? '!bg-emerald-600 !text-white !border-emerald-600 shadow-lg shadow-emerald-600/20' : ''} ${feedback === 'incorrect' && selected === o ? '!bg-red-500 !text-white !border-red-500 shadow-lg shadow-red-500/20' : ''}`}>{o}</button>
           ))}
         </div>
       </div>
@@ -302,20 +333,22 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
 };
 
 const ResultsView: React.FC<{ score: number, onRestart: () => void }> = ({ score, onRestart }) => (
-  <div className="px-8 py-12 flex-1 flex flex-col justify-center items-center text-center">
+  <div className="px-8 py-12 flex-1 flex flex-col justify-center items-center text-center animate-app-in">
     <div className="text-8xl mb-6">🏆</div>
     <h2 className="text-4xl font-black italic uppercase mb-2">CAMPEÃO!</h2>
+    <p className="text-slate-400 font-bold text-sm mb-10 italic">Você completou o desafio de elite!</p>
     <div className="bg-emerald-600 w-full p-8 rounded-[3rem] text-white shadow-2xl mb-10"><p className="text-6xl font-black">{score}</p><p className="text-[10px] font-bold uppercase tracking-widest mt-2 opacity-70">Placar Final</p></div>
-    <button onClick={onRestart} className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase italic active:scale-95">Jogar de Novo</button>
+    <button onClick={onRestart} className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase italic active:scale-95 shadow-xl">Jogar de Novo</button>
   </div>
 );
 
 const GameOverView: React.FC<{ score: number, onRestart: () => void }> = ({ score, onRestart }) => (
-  <div className="px-8 py-12 flex-1 flex flex-col justify-center items-center text-center">
+  <div className="px-8 py-12 flex-1 flex flex-col justify-center items-center text-center animate-app-in">
     <div className="text-8xl mb-6">🟥</div>
     <h2 className="text-4xl font-black italic uppercase mb-2 text-red-600">EXPULSO!</h2>
-    <div className="bg-red-50 w-full p-8 rounded-[3rem] border-2 border-red-100 mb-10"><p className="text-6xl font-black text-red-600">{score}</p><p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-red-400">Pontuação</p></div>
-    <button onClick={onRestart} className="w-full py-5 bg-red-600 text-white rounded-2xl font-black uppercase italic active:scale-95">Tentar Revanche</button>
+    <p className="text-slate-400 font-bold text-sm mb-10 italic">O juiz apitou o fim do jogo para você.</p>
+    <div className="bg-red-50 w-full p-8 rounded-[3rem] border-2 border-red-100 mb-10"><p className="text-6xl font-black text-red-600">{score}</p><p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-red-400">Sua Pontuação</p></div>
+    <button onClick={onRestart} className="w-full py-5 bg-red-600 text-white rounded-2xl font-black uppercase italic active:scale-95 shadow-xl">Tentar Revanche</button>
   </div>
 );
 
