@@ -1,12 +1,13 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
-import { Theme, Question, Difficulty } from "./types";
+import { Theme, Question } from "./types";
 
-const apiKey = (typeof process !== 'undefined' && process.env?.API_KEY) ? process.env.API_KEY : '';
-const ai = new GoogleGenAI({ apiKey });
+// Always use the process.env.API_KEY directly as per guidelines.
+// Strictly follow the initialization format: const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const generateQuestions = async (theme: Theme, count: number = 15): Promise<Question[]> => {
-  if (!apiKey) {
+  // Check if API key is configured.
+  if (!process.env.API_KEY) {
     console.warn("Gemini API Key não configurada.");
     return [];
   }
@@ -44,7 +45,9 @@ export const generateQuestions = async (theme: Theme, count: number = 15): Promi
       }
     });
 
-    const parsed = JSON.parse(response.text || "[]");
+    // Directly access the .text property on the GenerateContentResponse object as per guidelines.
+    const jsonStr = response.text || "[]";
+    const parsed = JSON.parse(jsonStr);
     return parsed.map((q: any) => ({
       ...q,
       id: `ai-${Math.random().toString(36).substr(2, 9)}`,

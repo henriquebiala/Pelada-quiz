@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Trophy, Home, Settings, LogOut, ShieldCheck, User, MessageSquarePlus, 
   Play, CheckCircle, XCircle, Star, Target, Volume2, VolumeX, 
-  Globe, LayoutGrid, ChevronRight, Zap, Award, Code, Microscope
+  Globe, LayoutGrid, ChevronRight, Zap, Award, Code, Microscope,
+  AlertTriangle
 } from 'lucide-react';
 import { onAuthStateChanged } from "firebase/auth";
 import { Theme, Question, UserProfile, Difficulty } from './types';
@@ -66,10 +66,14 @@ const App: React.FC = () => {
 
   const Credits = () => (
     <div className="mt-auto py-8 px-6 text-center border-t border-slate-100 bg-slate-50/50">
-      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Créditos de Desenvolvimento</p>
-      <div className="flex flex-col gap-1">
-        <p className="text-[11px] font-bold text-slate-600"><span className="text-emerald-600">Desenvolvido por</span> Henrique Biala</p>
-        <p className="text-[11px] font-bold text-slate-600"><span className="text-emerald-600">Testado por</span> Rúben Barros & Ermenegildo Perez</p>
+      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3">Créditos</p>
+      <div className="flex flex-col gap-1.5">
+        <p className="text-[11px] font-bold text-slate-600">
+          <span className="text-emerald-600">Desenvolvido por</span> Henrique Biala
+        </p>
+        <p className="text-[11px] font-bold text-slate-600">
+          <span className="text-emerald-600">Testado por</span> Rúben Barros & Ermenegildo Perez
+        </p>
       </div>
     </div>
   );
@@ -89,14 +93,16 @@ const App: React.FC = () => {
       ) : (
         <>
           <header className="px-5 py-4 flex justify-between items-center bg-white border-b border-slate-100 sticky top-0 z-50">
-            <div className="flex items-center gap-3" onClick={() => setView('home')}>
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => setView('home')}>
               <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-600/20 rotate-3">
                 <Trophy size={18} />
               </div>
               <span className="font-black text-lg tracking-tighter italic uppercase">Bom de Bola</span>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => setView('settings')} className="p-2 bg-slate-100 rounded-lg text-slate-500"><Settings size={20} /></button>
+              <button onClick={() => setView('settings')} className="p-2 bg-slate-100 rounded-lg text-slate-500 hover:bg-slate-200 transition-colors">
+                <Settings size={20} />
+              </button>
             </div>
           </header>
 
@@ -108,7 +114,14 @@ const App: React.FC = () => {
                   <Credits />
                 </>
               )}
-              {view === 'quiz' && selectedTheme && <QuizView theme={selectedTheme} onFinish={s => { setFinalScore(s); db.saveScore(user.uid, selectedTheme, s); setView('results'); }} onGameOver={s => { setFinalScore(s); db.saveScore(user.uid, selectedTheme, s); setView('gameover'); }} playSound={playSound} />}
+              {view === 'quiz' && selectedTheme && (
+                <QuizView 
+                  theme={selectedTheme} 
+                  onFinish={s => { setFinalScore(s); db.saveScore(user.uid, selectedTheme, s); setView('results'); }} 
+                  onGameOver={s => { setFinalScore(s); db.saveScore(user.uid, selectedTheme, s); setView('gameover'); }} 
+                  playSound={playSound} 
+                />
+              )}
               {view === 'results' && <ResultsView score={finalScore} onRestart={() => setView('home')} />}
               {view === 'gameover' && <GameOverView score={finalScore} onRestart={() => setView('home')} />}
               {view === 'ranking' && <RankingView onBack={() => setView('home')} />}
@@ -159,7 +172,7 @@ const AuthView: React.FC<{ onLogin: (u: UserProfile) => void }> = ({ onLogin }) 
     try {
       const u = isSignUp ? await db.register(email, pass, name) : await db.login(email, pass);
       if (u) onLogin(u);
-    } catch(err) { alert("Credenciais inválidas."); }
+    } catch(err) { alert("Credenciais inválidas ou erro no servidor."); }
     setLoad(false);
   };
 
@@ -168,13 +181,13 @@ const AuthView: React.FC<{ onLogin: (u: UserProfile) => void }> = ({ onLogin }) 
       <div className="w-20 h-20 bg-emerald-600 rounded-[2rem] flex items-center justify-center text-white mx-auto mb-8 shadow-2xl shadow-emerald-600/30 rotate-6">
         <Trophy size={40} />
       </div>
-      <h1 className="text-4xl font-black italic uppercase tracking-tighter text-center leading-none mb-2">Bom de Bola</h1>
+      <h1 className="text-4xl font-black italic uppercase tracking-tighter text-center leading-none mb-2 text-slate-900">Bom de Bola</h1>
       <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.3em] text-center mb-10">O quiz oficial da resenha</p>
       
       <form onSubmit={handle} className="space-y-3">
-        {isSignUp && <input required className="w-full p-4 bg-slate-100 rounded-2xl outline-none border-2 border-transparent focus:border-emerald-500 font-bold" placeholder="Seu Nome de Craque" value={name} onChange={e => setName(e.target.value)} />}
-        <input required className="w-full p-4 bg-slate-100 rounded-2xl outline-none border-2 border-transparent focus:border-emerald-500 font-bold" placeholder="E-mail" type="email" value={email} onChange={e => setEmail(e.target.value)} />
-        <input required className="w-full p-4 bg-slate-100 rounded-2xl outline-none border-2 border-transparent focus:border-emerald-500 font-bold" placeholder="Sua Senha" type="password" value={pass} onChange={e => setPass(e.target.value)} />
+        {isSignUp && <input required className="w-full p-4 bg-slate-100 rounded-2xl outline-none border-2 border-transparent focus:border-emerald-500 font-bold transition-all" placeholder="Seu Nome de Craque" value={name} onChange={e => setName(e.target.value)} />}
+        <input required className="w-full p-4 bg-slate-100 rounded-2xl outline-none border-2 border-transparent focus:border-emerald-500 font-bold transition-all" placeholder="E-mail" type="email" value={email} onChange={e => setEmail(e.target.value)} />
+        <input required className="w-full p-4 bg-slate-100 rounded-2xl outline-none border-2 border-transparent focus:border-emerald-500 font-bold transition-all" placeholder="Sua Senha" type="password" value={pass} onChange={e => setPass(e.target.value)} />
         <button disabled={load} className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest italic shadow-xl shadow-emerald-600/20 active:scale-95 transition-all">
           {load ? 'Entrando...' : isSignUp ? 'Criar Perfil' : 'Entrar em Campo'}
         </button>
@@ -233,22 +246,22 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
     const loadQs = async () => {
       setLoad(true);
       try {
-        // Tentamos carregar 15 perguntas via IA
+        // Garantindo 15 questões (5 fáceis, 5 médias, 5 difíceis) via IA
         const aiItems = await generateQuestions(theme, 15);
         if (aiItems.length > 0) {
-          // Ordenamos por dificuldade para garantir a progressão no jogo
-          const sorted = aiItems.sort((a, b) => {
-            const order = { 'fácil': 1, 'médio': 2, 'difícil': 3 };
-            return order[a.difficulty as keyof typeof order] - order[b.difficulty as keyof typeof order];
+          // Ordenar por dificuldade para criar uma curva de desafio (Fácil -> Médio -> Difícil)
+          const sorted = [...aiItems].sort((a, b) => {
+            const order: Record<string, number> = { 'fácil': 1, 'médio': 2, 'difícil': 3 };
+            return (order[a.difficulty] || 0) - (order[b.difficulty] || 0);
           });
           setQs(sorted);
         } else {
-           // Fallback se falhar
+           // Fallback se a IA falhar (puxa do banco se houver)
            const fallback = await db.getQuestions(theme);
-           setQs(fallback.length >= 3 ? fallback : []);
+           setQs(fallback);
         }
       } catch(e) { 
-        console.error("Erro ao carregar perguntas:", e);
+        console.error("Erro ao carregar questões:", e);
       }
       setLoad(false);
     };
@@ -264,17 +277,25 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
       setTimeout(() => {
         if (idx + 1 >= qs.length) onFinish((idx + 1) * 10);
         else { setIdx(i => i + 1); setSelected(null); setFeedback(null); playSound('next'); }
-      }, 800);
+      }, 700);
     } else {
       setFeedback('incorrect'); playSound('incorrect');
-      setTimeout(() => onGameOver(idx * 10), 800);
+      setTimeout(() => onGameOver(idx * 10), 1000);
     }
   };
 
   if (load) return (
-    <div className="h-[60vh] flex flex-col items-center justify-center">
-      <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Preparando as 15 rodadas...</p>
+    <div className="h-[60vh] flex flex-col items-center justify-center p-6 text-center">
+      <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Escalando as 15 perguntas de elite...</p>
+    </div>
+  );
+
+  if (qs.length === 0) return (
+    <div className="h-[60vh] flex flex-col items-center justify-center p-8 text-center">
+      <AlertTriangle className="text-amber-500 mb-4" size={48} />
+      <p className="text-slate-600 font-bold mb-6">Não conseguimos carregar as perguntas para este estádio.</p>
+      <button onClick={() => window.location.reload()} className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold uppercase text-xs">Recarregar</button>
     </div>
   );
 
@@ -282,7 +303,7 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
   const progress = ((idx) / qs.length) * 100;
 
   return (
-    <div className="px-5 py-4 h-full flex flex-col">
+    <div className="px-5 py-4 h-full flex flex-col flex-1">
       <div className="flex justify-between items-center mb-6 px-1">
         <div className="flex items-center gap-2">
            <div className={`w-2 h-2 rounded-full animate-pulse ${q.difficulty === 'fácil' ? 'bg-emerald-400' : q.difficulty === 'médio' ? 'bg-amber-400' : 'bg-red-400'}`}></div>
@@ -291,11 +312,11 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
         <span className="text-xs font-black text-slate-900">QUESTÃO {idx + 1}/{qs.length}</span>
       </div>
 
-      <div className="w-full h-1.5 bg-slate-100 rounded-full mb-8 overflow-hidden">
-        <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${progress}%` }}></div>
+      <div className="w-full h-2 bg-slate-100 rounded-full mb-8 overflow-hidden">
+        <div className="h-full bg-emerald-500 transition-all duration-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]" style={{ width: `${progress}%` }}></div>
       </div>
 
-      <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-50 flex flex-col items-center mb-6">
+      <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-50 flex flex-col items-center mb-6 min-h-[300px] justify-center">
         <h3 className="text-xl font-black text-slate-800 text-center leading-tight mb-8">
           {q.text}
         </h3>
@@ -309,8 +330,9 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
               className={`
                 w-full p-5 rounded-2xl text-left font-bold transition-all border-2 text-sm
                 ${selected === o ? 'border-emerald-500 scale-[0.98]' : 'border-slate-50 bg-slate-50'}
-                ${feedback === 'correct' && o === q.correctAnswer ? '!bg-emerald-600 !text-white !border-emerald-600' : ''}
-                ${feedback === 'incorrect' && selected === o ? '!bg-red-500 !text-white !border-red-500' : ''}
+                ${feedback === 'correct' && o === q.correctAnswer ? '!bg-emerald-600 !text-white !border-emerald-600 shadow-lg shadow-emerald-600/20' : ''}
+                ${feedback === 'incorrect' && selected === o ? '!bg-red-500 !text-white !border-red-500 shadow-lg shadow-red-500/20' : ''}
+                active:scale-[0.97]
               `}
             >
               {o}
@@ -328,59 +350,59 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
 };
 
 const ResultsView: React.FC<{ score: number, onRestart: () => void }> = ({ score, onRestart }) => (
-  <div className="px-8 py-12 flex-1 flex flex-col justify-center items-center text-center">
+  <div className="px-8 py-12 flex-1 flex flex-col justify-center items-center text-center animate-app-in">
     <div className="text-8xl mb-6">🏆</div>
-    <h2 className="text-4xl font-black italic uppercase tracking-tighter mb-2">GOLAÇO!</h2>
-    <p className="text-slate-400 font-bold text-sm mb-10">Você completou as 15 rodadas!</p>
+    <h2 className="text-4xl font-black italic uppercase tracking-tighter mb-2 text-slate-900">CAMPEÃO!</h2>
+    <p className="text-slate-400 font-bold text-sm mb-10">Você completou o desafio das 15 perguntas!</p>
     <div className="bg-emerald-600 w-full p-8 rounded-[3rem] text-white shadow-2xl shadow-emerald-600/30 mb-10">
       <p className="text-6xl font-black">{score}</p>
-      <p className="text-[10px] font-bold uppercase tracking-widest mt-2 opacity-70">Sua Pontuação</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest mt-2 opacity-70">Sua Pontuação Final</p>
     </div>
-    <button onClick={onRestart} className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest italic shadow-xl">Voltar ao Estádio</button>
+    <button onClick={onRestart} className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest italic shadow-xl active:scale-95 transition-all">Jogar de Novo</button>
   </div>
 );
 
 const GameOverView: React.FC<{ score: number, onRestart: () => void }> = ({ score, onRestart }) => (
-  <div className="px-8 py-12 flex-1 flex flex-col justify-center items-center text-center">
+  <div className="px-8 py-12 flex-1 flex flex-col justify-center items-center text-center animate-app-in">
     <div className="text-8xl mb-6">🟥</div>
-    <h2 className="text-4xl font-black italic uppercase tracking-tighter mb-2 text-red-600">FIM DE JOGO!</h2>
-    <p className="text-slate-400 font-bold text-sm mb-10">O juiz apitou o fim prematuro.</p>
+    <h2 className="text-4xl font-black italic uppercase tracking-tighter mb-2 text-red-600">EXPULSO!</h2>
+    <p className="text-slate-400 font-bold text-sm mb-10">Errou uma questão crucial. O juiz apitou!</p>
     <div className="bg-red-50 w-full p-8 rounded-[3rem] border-2 border-red-100 mb-10">
       <p className="text-6xl font-black text-red-600">{score}</p>
-      <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-red-400">Pontos Marcados</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-red-400">Pontos Até Agora</p>
     </div>
-    <button onClick={onRestart} className="w-full py-5 bg-red-600 text-white rounded-2xl font-black uppercase tracking-widest italic shadow-xl">Tentar Revanche</button>
+    <button onClick={onRestart} className="w-full py-5 bg-red-600 text-white rounded-2xl font-black uppercase tracking-widest italic shadow-xl active:scale-95 transition-all">Pedir Revanche</button>
   </div>
 );
 
 const SettingsView: React.FC<{ user: UserProfile, onToggleMute: any, isMuted: boolean, setView: any, onLogout: any }> = ({ user, onToggleMute, isMuted, setView, onLogout }) => (
-  <div className="px-6 py-8 flex-1 flex flex-col">
-    <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8 px-2">Configurações</h2>
+  <div className="px-6 py-8 flex-1 flex flex-col animate-app-in">
+    <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8 px-2">Opções</h2>
     <div className="space-y-3">
-      <button onClick={onToggleMute} className="w-full p-5 bg-white rounded-3xl flex items-center justify-between border border-slate-100 shadow-sm">
+      <button onClick={onToggleMute} className="w-full p-5 bg-white rounded-3xl flex items-center justify-between border border-slate-100 shadow-sm active:bg-slate-50">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-emerald-600">
             {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
           </div>
-          <span className="font-bold uppercase text-[11px] tracking-widest">{isMuted ? 'Som: Desativado' : 'Som: Ativado'}</span>
+          <span className="font-bold uppercase text-[11px] tracking-widest">{isMuted ? 'Áudio: Mudo' : 'Áudio: Ligado'}</span>
         </div>
         <div className={`w-12 h-6 rounded-full relative transition-all ${isMuted ? 'bg-slate-200' : 'bg-emerald-500'}`}>
           <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isMuted ? 'left-1' : 'left-7'}`}></div>
         </div>
       </button>
-      <button onClick={() => setView('suggest')} className="w-full p-5 bg-white rounded-3xl flex items-center gap-4 border border-slate-100 shadow-sm">
+      <button onClick={() => setView('suggest')} className="w-full p-5 bg-white rounded-3xl flex items-center gap-4 border border-slate-100 shadow-sm active:bg-slate-50">
         <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-emerald-600"><MessageSquarePlus size={20} /></div>
-        <span className="font-bold uppercase text-[11px] tracking-widest">Sugerir Pergunta</span>
+        <span className="font-bold uppercase text-[11px] tracking-widest">Contribuir com Questões</span>
       </button>
       {user.role === 'admin' && (
-        <button onClick={() => setView('admin')} className="w-full p-5 bg-emerald-50 rounded-3xl flex items-center gap-4 border border-emerald-100 shadow-sm">
+        <button onClick={() => setView('admin')} className="w-full p-5 bg-emerald-50 rounded-3xl flex items-center gap-4 border border-emerald-100 shadow-sm active:bg-emerald-100">
           <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-600"><ShieldCheck size={20} /></div>
-          <span className="font-bold uppercase text-[11px] tracking-widest text-emerald-700">Painel do VAR</span>
+          <span className="font-bold uppercase text-[11px] tracking-widest text-emerald-700">Painel do VAR (Admin)</span>
         </button>
       )}
-      <button onClick={onLogout} className="w-full p-5 bg-red-50 text-red-600 rounded-3xl flex items-center gap-4 border border-red-100 mt-10">
+      <button onClick={onLogout} className="w-full p-5 bg-red-50 text-red-600 rounded-3xl flex items-center gap-4 border border-red-100 mt-10 active:bg-red-100">
         <LogOut size={20} />
-        <span className="font-bold uppercase text-[11px] tracking-widest">Sair do Jogo</span>
+        <span className="font-bold uppercase text-[11px] tracking-widest">Sair da Conta</span>
       </button>
     </div>
   </div>
@@ -395,11 +417,11 @@ const RankingView: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   }, []);
 
   return (
-    <div className="px-5 py-6">
-      <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8 px-2">Hall da Fama</h2>
+    <div className="px-5 py-6 animate-app-in">
+      <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8 px-2">Top 10 Global</h2>
       <div className="space-y-2">
         {load ? (
-          <div className="p-10 text-center text-slate-300 font-bold uppercase text-[10px]">Carregando Placar...</div>
+          <div className="p-10 text-center text-slate-300 font-bold uppercase text-[10px]">Escalando o placar...</div>
         ) : list.map((u, i) => (
           <div key={u.uid} className="bg-white p-4 rounded-2xl flex items-center justify-between border border-slate-50 shadow-sm">
             <div className="flex items-center gap-4">
@@ -423,7 +445,7 @@ const RankingView: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 };
 
 const ProfileView: React.FC<{ user: UserProfile, onBack: () => void }> = ({ user, onBack }) => (
-  <div className="px-6 py-8">
+  <div className="px-6 py-8 animate-app-in">
     <div className="bg-slate-900 rounded-[2.5rem] p-8 text-center text-white mb-8 shadow-xl shadow-slate-900/20">
       <div className="w-20 h-20 bg-emerald-500 rounded-3xl flex items-center justify-center text-white text-4xl font-black mx-auto mb-6 rotate-6 shadow-xl">
         {user.displayName[0].toUpperCase()}
@@ -433,10 +455,10 @@ const ProfileView: React.FC<{ user: UserProfile, onBack: () => void }> = ({ user
     </div>
     
     <div className="px-2">
-      <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Histórico de Partidas</h3>
+      <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Últimos Jogos</h3>
       <div className="space-y-3">
         {(!user.scores || user.scores.length === 0) ? (
-          <div className="p-10 border-2 border-dashed border-slate-200 rounded-3xl text-center text-slate-300 text-[10px] font-bold uppercase">Nenhum jogo registrado</div>
+          <div className="p-10 border-2 border-dashed border-slate-200 rounded-3xl text-center text-slate-300 text-[10px] font-bold uppercase">Ainda não entrou em campo</div>
         ) : user.scores.slice(-5).reverse().map((s, i) => (
           <div key={i} className="bg-white p-5 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-4">
@@ -460,25 +482,25 @@ const AdminView: React.FC<{ onBack: any }> = ({ onBack }) => {
   const [pend, setPend] = useState<Question[]>([]);
   useEffect(() => { db.getPendingQuestions().then(setPend); }, []);
   return (
-    <div className="px-6 py-6">
+    <div className="px-6 py-6 animate-app-in">
       <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8">Central do VAR</h2>
       <div className="space-y-4">
         {pend.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-5xl mb-4">⛳</div>
-            <p className="text-slate-300 font-bold uppercase text-[10px] tracking-widest">Nenhuma revisão pendente</p>
+            <p className="text-slate-300 font-bold uppercase text-[10px] tracking-widest">Tudo limpo no VAR</p>
           </div>
         ) : pend.map(q => (
           <div key={q.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
             <p className="font-bold text-sm mb-4 leading-tight">"{q.text}"</p>
             <div className="flex gap-2">
               <button onClick={() => db.approveQuestion(q.id).then(() => setPend(p => p.filter(x => x.id !== q.id)))} className="flex-1 py-3 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic">Aprovar</button>
-              <button onClick={() => db.deleteQuestion(q.id).then(() => setPend(p => p.filter(x => x.id !== q.id)))} className="flex-1 py-3 bg-red-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic">Eliminar</button>
+              <button onClick={() => db.deleteQuestion(q.id).then(() => setPend(p => p.filter(x => x.id !== q.id)))} className="flex-1 py-3 bg-red-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic">Recusar</button>
             </div>
           </div>
         ))}
       </div>
-      <button onClick={onBack} className="mt-10 w-full text-slate-400 font-bold uppercase text-[10px] tracking-[0.4em]">Sair do VAR</button>
+      <button onClick={onBack} className="mt-10 w-full text-slate-400 font-bold uppercase text-[10px] tracking-[0.4em] active:text-slate-600 transition-colors">Voltar</button>
     </div>
   );
 };
@@ -505,27 +527,27 @@ const SuggestView: React.FC<{ user: UserProfile, onBack: any }> = ({ user, onBac
   };
 
   if (done) return (
-    <div className="px-8 py-20 text-center">
+    <div className="px-8 py-20 text-center animate-app-in">
       <div className="text-6xl mb-6">✅</div>
-      <h2 className="text-2xl font-black italic uppercase mb-2">Lance Enviado!</h2>
-      <p className="text-slate-400 text-sm mb-10">Sua pergunta foi enviada para revisão no VAR.</p>
-      <button onClick={onBack} className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest italic shadow-xl">Continuar Jogando</button>
+      <h2 className="text-2xl font-black italic uppercase mb-2">Sugestão Enviada!</h2>
+      <p className="text-slate-400 text-sm mb-10">Obrigado! Sua pergunta será analisada pelo VAR em breve.</p>
+      <button onClick={onBack} className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest italic shadow-xl active:scale-95 transition-all">Continuar</button>
     </div>
   );
 
   return (
-    <div className="px-6 py-8">
+    <div className="px-6 py-8 animate-app-in">
       <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8">Sugerir Lance</h2>
       <form onSubmit={sub} className="space-y-4">
         <div className="space-y-1">
-          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Pergunta</label>
-          <textarea required className="w-full p-4 bg-white border border-slate-100 rounded-2xl outline-none font-bold min-h-[120px] focus:border-emerald-500 transition-all" placeholder="Ex: Quem marcou o gol do título?" value={text} onChange={e => setText(e.target.value)} />
+          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Sua Pergunta</label>
+          <textarea required className="w-full p-4 bg-white border border-slate-100 rounded-2xl outline-none font-bold min-h-[120px] focus:border-emerald-500 transition-all" placeholder="Ex: Em que ano o Pelé estreou em Copas?" value={text} onChange={e => setText(e.target.value)} />
         </div>
         <div className="space-y-1">
-          <label className="text-[10px] font-black uppercase tracking-widest text-emerald-600 ml-2">Resposta Correta</label>
-          <input required className="w-full p-4 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-2xl outline-none font-black" placeholder="A resposta que vale o gol" value={correct} onChange={e => setCorrect(e.target.value)} />
+          <label className="text-[10px] font-black uppercase tracking-widest text-emerald-600 ml-2">Resposta Certa</label>
+          <input required className="w-full p-4 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-2xl outline-none font-black" placeholder="A resposta correta" value={correct} onChange={e => setCorrect(e.target.value)} />
         </div>
-        <button className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest italic shadow-xl mt-4">Enviar ao Juiz</button>
+        <button className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest italic shadow-xl mt-4 active:scale-95 transition-all">Enviar ao VAR</button>
       </form>
     </div>
   );
