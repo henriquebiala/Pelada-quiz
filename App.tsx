@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Trophy, Home, Settings, LogOut, ShieldCheck, User, MessageSquarePlus, 
-  Target, Volume2, VolumeX, Globe, ChevronRight, Zap, Award, AlertTriangle
+  Target, Volume2, VolumeX, Globe, ChevronRight, Zap, Award, AlertTriangle,
+  LayoutDashboard, CheckCircle2, XCircle, Users, Database
 } from 'lucide-react';
 import { onAuthStateChanged } from "firebase/auth";
 import { Theme, Question, UserProfile, Difficulty } from './types';
@@ -126,9 +127,16 @@ const App: React.FC = () => {
               </div>
               <span className="font-black text-lg tracking-tighter italic uppercase">Bom de Bola</span>
             </div>
-            <button onClick={() => setView('settings')} className="p-2 bg-slate-100 rounded-lg text-slate-500 hover:bg-slate-200 transition-colors">
-              <Settings size={20} />
-            </button>
+            <div className="flex items-center gap-2">
+              {user.role === 'admin' && (
+                <button onClick={() => setView('admin')} className={`p-2 rounded-lg transition-colors ${view === 'admin' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'}`} title="Painel do VAR">
+                  <ShieldCheck size={20} />
+                </button>
+              )}
+              <button onClick={() => setView('settings')} className={`p-2 rounded-lg transition-colors ${view === 'settings' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                <Settings size={20} />
+              </button>
+            </div>
           </header>
 
           <main className="flex-1 pb-24 overflow-y-auto">
@@ -162,7 +170,7 @@ const App: React.FC = () => {
             </div>
           </main>
 
-          {['home', 'ranking', 'profile'].includes(view) && (
+          {['home', 'ranking', 'profile', 'admin'].includes(view) && (
             <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white border-t border-slate-100 px-6 py-3 flex justify-around items-center z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
               <button onClick={() => setView('home')} className={`flex flex-col items-center gap-1 ${view === 'home' ? 'text-emerald-600' : 'text-slate-400'}`}>
                 <Home size={22} /><span className="text-[10px] font-bold uppercase tracking-tight">Jogar</span>
@@ -173,6 +181,11 @@ const App: React.FC = () => {
               <button onClick={() => setView('profile')} className={`flex flex-col items-center gap-1 ${view === 'profile' ? 'text-emerald-600' : 'text-slate-400'}`}>
                 <User size={22} /><span className="text-[10px] font-bold uppercase tracking-tight">Perfil</span>
               </button>
+              {user.role === 'admin' && (
+                <button onClick={() => setView('admin')} className={`flex flex-col items-center gap-1 ${view === 'admin' ? 'text-emerald-600' : 'text-slate-400'}`}>
+                  <ShieldCheck size={22} /><span className="text-[10px] font-bold uppercase tracking-tight">VAR</span>
+                </button>
+              )}
             </nav>
           )}
         </>
@@ -264,7 +277,6 @@ const QuizView: React.FC<{ theme: Theme, onFinish: (s: number) => void, onGameOv
         if (items.length === 0) items = await db.getQuestions(theme);
         if (items.length === 0) items = FALLBACK_QUESTIONS[theme] || FALLBACK_QUESTIONS[Theme.MUNDIAL];
         
-        // Garantir que temos 15 se for fallback de teste ou completar com mundiais
         if (items.length < 15 && items.length > 0) {
             const filler = (FALLBACK_QUESTIONS[Theme.MUNDIAL]).filter(f => !items.find(it => it.text === f.text));
             items = [...items, ...filler].slice(0, 15);
@@ -364,7 +376,12 @@ const SettingsView: React.FC<{ user: UserProfile, onToggleMute: any, isMuted: bo
         <div className={`w-12 h-6 rounded-full relative transition-all ${isMuted ? 'bg-slate-200' : 'bg-emerald-500'}`}><div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isMuted ? 'left-1' : 'left-7'}`}></div></div>
       </button>
       <button onClick={() => setView('suggest')} className="w-full p-5 bg-white rounded-3xl flex items-center gap-4 border border-slate-100"><div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-emerald-600"><MessageSquarePlus size={20} /></div><span className="font-bold uppercase text-[11px] tracking-widest">Sugerir Pergunta</span></button>
-      {user.role === 'admin' && <button onClick={() => setView('admin')} className="w-full p-5 bg-emerald-50 rounded-3xl flex items-center gap-4 border border-emerald-100"><div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-600"><ShieldCheck size={20} /></div><span className="font-bold uppercase text-[11px] tracking-widest text-emerald-700">Painel do VAR</span></button>}
+      {user.role === 'admin' && (
+        <button onClick={() => setView('admin')} className="w-full p-5 bg-emerald-600 text-white rounded-3xl flex items-center gap-4 shadow-lg shadow-emerald-600/20 active:scale-95 transition-transform">
+          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><ShieldCheck size={20} /></div>
+          <span className="font-black uppercase text-[11px] tracking-[0.1em] italic">Acessar Central do VAR</span>
+        </button>
+      )}
       <button onClick={onLogout} className="w-full p-5 bg-red-50 text-red-600 rounded-3xl flex items-center gap-4 border border-red-100 mt-10"><LogOut size={20} /><span className="font-bold uppercase text-[11px] tracking-widest">Sair da Conta</span></button>
     </div>
   </div>
@@ -377,7 +394,7 @@ const RankingView: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     <div className="px-5 py-6 animate-app-in">
       <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8 px-2">Top 10 Global</h2>
       <div className="space-y-2">{list.map((u, i) => (
-        <div key={u.uid} className="bg-white p-4 rounded-2xl flex items-center justify-between border border-slate-50"><div className="flex items-center gap-4"><div className={`w-9 h-9 rounded-lg flex items-center justify-center font-black ${i === 0 ? 'bg-amber-400 text-white' : 'bg-slate-100 text-slate-400'}`}>{i + 1}</div><span className="font-bold text-sm">{u.displayName}</span></div><div className="text-right"><p className="text-lg font-black text-emerald-600">{(u.scores || []).reduce((a, b) => a + b.points, 0)}</p><p className="text-[8px] font-bold text-slate-300 uppercase">PTS</p></div></div>
+        <div key={u.uid} className="bg-white p-4 rounded-2xl flex items-center justify-between border border-slate-50 shadow-sm"><div className="flex items-center gap-4"><div className={`w-9 h-9 rounded-lg flex items-center justify-center font-black ${i === 0 ? 'bg-amber-400 text-white shadow-lg shadow-amber-400/20' : 'bg-slate-100 text-slate-400'}`}>{i + 1}</div><span className="font-bold text-sm">{u.displayName}</span></div><div className="text-right"><p className="text-lg font-black text-emerald-600">{(u.scores || []).reduce((a, b) => a + b.points, 0)}</p><p className="text-[8px] font-bold text-slate-300 uppercase">PTS</p></div></div>
       ))}</div>
     </div>
   );
@@ -385,22 +402,126 @@ const RankingView: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
 const ProfileView: React.FC<{ user: UserProfile, onBack: () => void }> = ({ user, onBack }) => (
   <div className="px-6 py-8 animate-app-in">
-    <div className="bg-slate-900 rounded-[2.5rem] p-8 text-center text-white mb-8"><div className="w-20 h-20 bg-emerald-500 rounded-3xl flex items-center justify-center text-white text-4xl font-black mx-auto mb-6 rotate-6">{user.displayName[0].toUpperCase()}</div><h2 className="text-2xl font-black uppercase italic mb-1">{user.displayName}</h2><p className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest">{user.email}</p></div>
+    <div className="bg-slate-900 rounded-[2.5rem] p-8 text-center text-white mb-8 shadow-2xl relative overflow-hidden">
+      <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-600/20 rounded-full blur-3xl"></div>
+      <div className="relative z-10">
+        <div className="w-20 h-20 bg-emerald-500 rounded-3xl flex items-center justify-center text-white text-4xl font-black mx-auto mb-6 rotate-6 shadow-xl">{user.displayName[0].toUpperCase()}</div>
+        <div className="flex items-center justify-center gap-2 mb-1">
+          <h2 className="text-2xl font-black uppercase italic">{user.displayName}</h2>
+          {user.role === 'admin' && <ShieldCheck size={16} className="text-emerald-400" />}
+        </div>
+        <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest">{user.email}</p>
+      </div>
+    </div>
     <div className="px-2"><h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Últimos Jogos</h3><div className="space-y-3">{user.scores?.slice(-5).reverse().map((s, i) => (
-      <div key={i} className="bg-white p-5 rounded-2xl border border-slate-100 flex items-center justify-between"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-emerald-500"><Target size={20} /></div><div><p className="text-xs font-bold uppercase tracking-tight">{s.theme}</p><p className="text-[9px] text-slate-400 font-bold uppercase">{new Date(s.date).toLocaleDateString()}</p></div></div><span className="text-xl font-black text-emerald-600">{s.points}</span></div>
+      <div key={i} className="bg-white p-5 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-emerald-500"><Target size={20} /></div><div><p className="text-xs font-bold uppercase tracking-tight">{s.theme}</p><p className="text-[9px] text-slate-400 font-bold uppercase">{new Date(s.date).toLocaleDateString()}</p></div></div><span className="text-xl font-black text-emerald-600">{s.points}</span></div>
     ))}</div></div>
   </div>
 );
 
 const AdminView: React.FC<{ onBack: any }> = ({ onBack }) => {
   const [pend, setPend] = useState<Question[]>([]);
-  useEffect(() => { db.getPendingQuestions().then(setPend); }, []);
+  const [stats, setStats] = useState({ users: 0, pending: 0 });
+  const [load, setLoad] = useState(true);
+
+  useEffect(() => {
+    const fetchAdminData = async () => {
+      setLoad(true);
+      try {
+        const [pendingQs, ranking] = await Promise.all([
+          db.getPendingQuestions(),
+          db.getGlobalRanking()
+        ]);
+        setPend(pendingQs);
+        setStats({ 
+          users: ranking.length, 
+          pending: pendingQs.length 
+        });
+      } catch (e) {
+        console.error("Erro Admin:", e);
+      } finally {
+        setLoad(false);
+      }
+    };
+    fetchAdminData();
+  }, []);
+
+  const handleAction = async (id: string, action: 'approve' | 'delete') => {
+    if (action === 'approve') await db.approveQuestion(id);
+    else await db.deleteQuestion(id);
+    setPend(p => p.filter(x => x.id !== id));
+    setStats(s => ({ ...s, pending: s.pending - 1 }));
+  };
+
+  if (load) return (
+    <div className="flex-1 flex flex-col items-center justify-center p-10 text-center animate-pulse">
+      <ShieldCheck size={48} className="text-emerald-500 mb-4" />
+      <p className="font-black uppercase italic text-slate-400 text-sm">Carregando Central do VAR...</p>
+    </div>
+  );
+
   return (
-    <div className="px-6 py-6 animate-app-in">
-      <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8">Central do VAR</h2>
-      <div className="space-y-4">{pend.map(q => (
-        <div key={q.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm"><p className="font-bold text-sm mb-4">"{q.text}"</p><div className="flex gap-2"><button onClick={() => db.approveQuestion(q.id).then(() => setPend(p => p.filter(x => x.id !== q.id)))} className="flex-1 py-3 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase italic">Aprovar</button><button onClick={() => db.deleteQuestion(q.id).then(() => setPend(p => p.filter(x => x.id !== q.id)))} className="flex-1 py-3 bg-red-500 text-white rounded-xl text-[10px] font-black uppercase italic">Recusar</button></div></div>
-      ))}</div>
+    <div className="px-5 py-6 animate-app-in space-y-6">
+      <div className="flex items-center justify-between px-2">
+        <h2 className="text-3xl font-black italic uppercase tracking-tighter leading-none">Central<br/><span className="text-emerald-600">do VAR</span></h2>
+        <div className="bg-emerald-600 text-white p-3 rounded-2xl rotate-3 shadow-lg shadow-emerald-600/20">
+          <ShieldCheck size={24} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-slate-900 text-white p-5 rounded-3xl shadow-xl">
+          <Users size={18} className="text-emerald-400 mb-2" />
+          <p className="text-2xl font-black italic">{stats.users}</p>
+          <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Usuários Ativos</p>
+        </div>
+        <div className="bg-white border border-slate-100 p-5 rounded-3xl shadow-sm">
+          <Database size={18} className="text-emerald-600 mb-2" />
+          <p className="text-2xl font-black italic text-slate-800">{stats.pending}</p>
+          <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Sugestões Pendentes</p>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 px-2 flex items-center gap-2">
+          <LayoutDashboard size={14} /> Analisar Sugestões
+        </h3>
+        {pend.length === 0 ? (
+          <div className="bg-emerald-50 border-2 border-dashed border-emerald-100 rounded-[2.5rem] p-12 text-center">
+            <CheckCircle2 size={40} className="text-emerald-500 mx-auto mb-4" />
+            <p className="text-sm font-bold text-emerald-700 italic">O VAR está em dia!<br/>Nenhuma sugestão pendente.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {pend.map(q => (
+              <div key={q.id} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-1.5 h-full bg-emerald-500"></div>
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[9px] font-black uppercase tracking-widest bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full">{q.theme}</span>
+                    <span className="text-[9px] font-bold text-slate-400 italic">Sugestão de: {q.suggestedBy || 'Anônimo'}</span>
+                  </div>
+                  <p className="font-bold text-slate-800 text-base leading-tight italic">"{q.text}"</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <button 
+                    onClick={() => handleAction(q.id, 'approve')} 
+                    className="flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase italic shadow-lg shadow-emerald-600/20 active:scale-95 transition-all"
+                  >
+                    <CheckCircle2 size={14} /> Aprovar
+                  </button>
+                  <button 
+                    onClick={() => handleAction(q.id, 'delete')} 
+                    className="flex items-center justify-center gap-2 py-3.5 bg-white border-2 border-red-100 text-red-600 rounded-2xl text-[10px] font-black uppercase italic active:scale-95 transition-all"
+                  >
+                    <XCircle size={14} /> Recusar
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -411,12 +532,51 @@ const SuggestView: React.FC<{ user: UserProfile, onBack: any }> = ({ user, onBac
   const [done, setDone] = useState(false);
   const sub = async (e: React.FormEvent) => {
     e.preventDefault();
-    await db.saveQuestion({ id: Date.now().toString(), text, options: [correct, 'Opção B', 'Opção C', 'Opção D'].sort(() => Math.random() - 0.5), correctAnswer: correct, theme: Theme.MUNDIAL, subtheme: 'Sugestão', difficulty: Difficulty.MEDIO, approved: false, suggestedBy: user.email });
+    await db.saveQuestion({ 
+      id: Date.now().toString(), 
+      text, 
+      options: [correct, 'Opção B', 'Opção C', 'Opção D'].sort(() => Math.random() - 0.5), 
+      correctAnswer: correct, 
+      theme: Theme.MUNDIAL, 
+      subtheme: 'Sugestão', 
+      difficulty: Difficulty.MEDIO, 
+      approved: false, 
+      suggestedBy: user.email 
+    });
     setDone(true);
   };
-  if (done) return <div className="px-8 py-20 text-center"><div className="text-6xl mb-6">✅</div><h2 className="text-2xl font-black italic uppercase mb-10">Enviado pro VAR!</h2><button onClick={onBack} className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase italic">Voltar</button></div>;
+  if (done) return (
+    <div className="px-8 py-20 text-center animate-app-in">
+      <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+        <CheckCircle2 size={48} className="text-emerald-600" />
+      </div>
+      <h2 className="text-3xl font-black italic uppercase mb-2">Lance Enviado!</h2>
+      <p className="text-slate-400 font-bold text-sm mb-12 italic">Nossa equipe do VAR vai analisar sua pergunta em breve.</p>
+      <button onClick={onBack} className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black uppercase italic shadow-xl shadow-emerald-600/20 active:scale-95">Voltar ao Estádio</button>
+    </div>
+  );
   return (
-    <div className="px-6 py-8 animate-app-in"><h2 className="text-3xl font-black italic uppercase tracking-tighter mb-8">Sugerir Lance</h2><form onSubmit={sub} className="space-y-4"><textarea required className="w-full p-4 bg-white border border-slate-100 rounded-2xl font-bold min-h-[120px]" placeholder="Sua pergunta..." value={text} onChange={e => setText(e.target.value)} /><input required className="w-full p-4 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-2xl font-black" placeholder="Resposta Correta" value={correct} onChange={e => setCorrect(e.target.value)} /><button className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase italic shadow-xl mt-4">Mandar pro VAR</button></form></div>
+    <div className="px-6 py-8 animate-app-in flex flex-col h-full">
+      <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-2 px-2">Sugerir Lance</h2>
+      <p className="text-slate-400 font-bold text-xs uppercase tracking-widest mb-10 px-2">Ajude a construir o melhor quiz do mundo</p>
+      <form onSubmit={sub} className="space-y-4 flex-1">
+        <div className="space-y-1">
+          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-2">A Pergunta</label>
+          <textarea required className="w-full p-5 bg-white border border-slate-100 rounded-3xl font-bold min-h-[140px] shadow-sm outline-none focus:border-emerald-500 transition-colors" placeholder="Ex: Quem marcou o gol do título na final da Copa de 2010?" value={text} onChange={e => setText(e.target.value)} />
+        </div>
+        <div className="space-y-1">
+          <label className="text-[10px] font-black uppercase tracking-widest text-emerald-600 px-2">A Resposta Correta</label>
+          <input required className="w-full p-5 bg-emerald-50 text-emerald-800 border border-emerald-100 rounded-2xl font-black shadow-sm outline-none focus:border-emerald-500 transition-colors" placeholder="Ex: Iniesta" value={correct} onChange={e => setCorrect(e.target.value)} />
+        </div>
+        <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 mb-8">
+          <div className="flex gap-3 items-start">
+            <AlertTriangle className="text-amber-500 flex-shrink-0" size={20} />
+            <p className="text-[11px] font-bold text-slate-500 leading-relaxed italic">Sua pergunta será enviada para a Central do VAR. Após aprovação, ela aparecerá para todos os jogadores!</p>
+          </div>
+        </div>
+        <button className="w-full py-5 bg-slate-900 text-white rounded-3xl font-black uppercase italic shadow-xl active:scale-95 transition-transform mt-auto">Mandar pro VAR</button>
+      </form>
+    </div>
   );
 };
 
