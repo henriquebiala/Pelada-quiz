@@ -1,12 +1,9 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { Theme, Question } from "./types";
+import { Theme, Question, Difficulty } from "./types";
 
-// Função para obter o cliente AI de forma segura
 const getAIClient = () => {
   const apiKey = process.env.API_KEY;
-  if (!apiKey) {
-    throw new Error("Gemini API Key não encontrada no ambiente.");
-  }
+  if (!apiKey) throw new Error("Chave Gemini não configurada.");
   return new GoogleGenAI({ apiKey });
 };
 
@@ -14,16 +11,12 @@ export const generateQuestions = async (theme: Theme, count: number = 15): Promi
   try {
     const ai = getAIClient();
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: `Gere exatamente ${count} perguntas sobre ${theme}. 
-      A distribuição de dificuldade DEVE SER:
-      - 5 perguntas de nível 'fácil'
-      - 5 perguntas de nível 'médio'
-      - 5 perguntas de nível 'difícil'
-      
-      Garanta que as perguntas sejam reais e históricas.`,
+      model: "gemini-flash-latest",
+      contents: `Gere exatamente ${count} perguntas reais e históricas sobre ${theme}. 
+      Distribuição: 5 fáceis, 5 médias, 5 difíceis.
+      Foque em curiosidades, recordes e história real (incluindo Girabola e futebol angolano se o tema for Angolano).`,
       config: {
-        systemInstruction: "Você é um historiador especialista em futebol mundial, africano e angolano. Gere perguntas reais e desafiadoras. Para o futebol angolano, mencione Girabola e ídolos locais. Formato JSON estrito. Não repita perguntas.",
+        systemInstruction: "Você é um historiador de futebol. Gere JSON estrito. Não use Markdown.",
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.ARRAY,
@@ -31,23 +24,18 @@ export const generateQuestions = async (theme: Theme, count: number = 15): Promi
             type: Type.OBJECT,
             properties: {
               text: { type: Type.STRING },
-              options: { 
-                type: Type.ARRAY, 
-                items: { type: Type.STRING }
-              },
+              options: { type: Type.ARRAY, items: { type: Type.STRING } },
               correctAnswer: { type: Type.STRING },
-              subtheme: { type: Type.STRING },
-              difficulty: { type: Type.STRING, enum: ["fácil", "médio", "difícil"] }
+              difficulty: { type: Type.STRING, enum: ["fácil", "médio", "difícil"] },
+              subtheme: { type: Type.STRING }
             },
-            required: ["text", "options", "correctAnswer", "subtheme", "difficulty"]
+            required: ["text", "options", "correctAnswer", "difficulty", "subtheme"]
           }
         }
       }
     });
 
-    const jsonStr = response.text || "[]";
-    const parsed = JSON.parse(jsonStr);
-    
+    const parsed = JSON.parse(response.text || "[]");
     return parsed.map((q: any) => ({
       ...q,
       id: `ai-${Math.random().toString(36).substr(2, 9)}`,
@@ -55,7 +43,7 @@ export const generateQuestions = async (theme: Theme, count: number = 15): Promi
       approved: true
     }));
   } catch (error) {
-    console.error("Erro ao gerar perguntas via IA:", error);
+    console.error("Gemini falhou:", error);
     return [];
   }
 };

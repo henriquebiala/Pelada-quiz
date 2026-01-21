@@ -7,18 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script>
-      // Capturador de erros global para diagnóstico visual em caso de falha crítica
+      // Capturador de erros para diagnóstico
       window.onerror = function(msg, url, lineNo, columnNo, error) {
-        console.error('Erro detectado:', msg, error);
-        const root = document.getElementById('root');
-        if (root && root.innerHTML === '') {
-          root.innerHTML = '<div style="padding: 40px; color: white; background: #0f172a; height: 100vh; font-family: sans-serif;">' +
-            '<h1 style="color: #ef4444; font-size: 24px; margin-bottom: 10px;">Erro de Inicialização</h1>' +
-            '<p style="margin-bottom: 20px;">O aplicativo não conseguiu carregar os módulos necessários.</p>' +
-            '<pre style="background: #1e293b; padding: 15px; border-radius: 8px; overflow: auto; font-size: 12px; margin-bottom: 20px;">' + msg + '</pre>' +
-            '<button onclick="location.reload()" style="background: #10b981; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold;">Tentar Novamente</button>' +
-            '</div>';
-        }
+        console.error('Falha crítica:', msg);
         return false;
       };
     </script>
@@ -35,7 +26,6 @@
           display: flex;
           justify-content: center;
           min-height: 100vh;
-          overflow-x: hidden;
         }
         #root {
           width: 100%;
@@ -48,8 +38,6 @@
           position: relative;
         }
         button:active { transform: scale(0.96); }
-        @media (max-width: 480px) { #root { box-shadow: none; } }
-        
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
