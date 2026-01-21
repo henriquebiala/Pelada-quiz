@@ -1,11 +1,13 @@
 
 {
   "hosting": {
+    "site": "pelada-6d29b",
     "public": ".",
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      ".firebaserc"
     ],
     "rewrites": [
       {
